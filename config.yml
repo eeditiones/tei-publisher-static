@@ -1,4 +1,5 @@
 remote: "http://localhost:8080/exist/apps/tei-publisher/"
+components: 1.34.0
 templates:
   view.html:
     main:

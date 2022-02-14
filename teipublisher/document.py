@@ -15,7 +15,7 @@ def fetch(config: Config, doc: str, clear: bool = False):
     
     meta['doc'] = quote_plus(doc)
     meta['remote'] = config.baseUri
-
+    meta['components'] = config.components
     
     _checkCSS(meta, config.baseUri, config.baseDir)
     output = createDirectory(config.baseDir, doc, clear)

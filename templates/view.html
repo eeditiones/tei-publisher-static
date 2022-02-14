@@ -82,6 +82,7 @@
                         xpath="{{xpath}}"
                         {% endif %}
                         subscribe="transcription" emit="transcription"
+                        column-separator=".tei-cb"
                         wait-for="toc" static></pb-view>
                     <pb-navigation direction="forward" unit="page" emit="transcription"
                         subscribe="transcription" keyboard="right">

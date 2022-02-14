@@ -1,12 +1,12 @@
 # Static Site Generator for TEI Publisher
 
-**Work in Progress** - status: functional, but not complete
+**Work in Progress** - status: functional, but not complete.
 
 This repository contains a static site generator for TEI Publisher. It can basically create a static version of a website by pre-generating all content. It does so by traversing the site's content via TEI Publishers public API. The result is a website without dynamic content: neither eXist-db nor TEI Publisher are required.
 
 ## Installation
 
-The generator is written in Python and requires Python 3.
+The generator is written in Python and requires Python 3. Until TEI Publisher 8 is released, you also need a development build of TEI Publisher (master branch).
 
 1. clone the repository
 2. install dependencies:
@@ -18,6 +18,14 @@ To recursively fetch an entire site, simply run
 
 ```sh
 python3 main.py collection --recursive
+```
+
+The `--recursive` option will automatically fetch the content of all documents. Skip it to just retrieve the collection listing.
+
+Once you generated the collections, you can also update a single document:
+
+```sh
+python3 main.py document test/F-rom.xml -d
 ```
 
 ## How does it work?

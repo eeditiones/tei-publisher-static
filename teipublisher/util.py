@@ -22,6 +22,7 @@ class Config:
             data = yaml.load(f, Loader=yaml.FullLoader)
             self.baseUri = data.get('remote') or baseUri
             self.baseDir = data.get('baseDir') or baseDir
+            self.components = data.get('components') or 'latest'
             self.templates = data.get('templates')
             self.assets = data.get('assets')
     
