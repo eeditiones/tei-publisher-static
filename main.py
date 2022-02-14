@@ -42,7 +42,7 @@ def clean(
 ):
     path = Path(outDir)
     for file in path.iterdir():
-        if (file.is_dir() and not(file.name == 'css' or file.name == 'images')):
+        if file.is_dir():
             rmtree(file)
 
 if __name__ == "__main__":

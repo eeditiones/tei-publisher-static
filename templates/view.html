@@ -59,6 +59,14 @@
                     {% include 'toolbar.html' %}
                 </app-header>
 
+                <pb-drawer toggle="tocToggle" class="toc" emit="toc" subscribe="transcription">
+                    <div class="drawer-content">
+                        <h3>
+                            <pb-i18n key="document.contents">Contents</pb-i18n>
+                        </h3>
+                        <pb-load id="toc" url="toc.html" src="document1" expand="expand" subscribe="toc" load-once="load-once"><pb-i18n key="dialogs.loading">Loading</pb-i18n></pb-load>
+                    </div>
+                </pb-drawer>
                 <section class="breadcrumbs">
                     <pb-view id="title-view1" src="document1" xpath="//teiHeader/fileDesc/titleStmt" view="single" static>
                         <pb-param name="mode" value="title"/>

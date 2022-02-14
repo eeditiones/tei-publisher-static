@@ -6,6 +6,7 @@ templates:
       view: single
       xpath: //teiHeader/fileDesc/titleStmt
       user.mode: title
+    toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=true"
   facsimile.html:
     main:
     title:
@@ -18,5 +19,16 @@ templates:
       user.mode: breadcrumbs
     toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=false"
     documentation.css: "{{remote}}templates/pages/documentation.css"
+  translation.html:
+    transcription:
+      xpath: "! (.//text[@xml:lang = 'la']/body | .//text/body)[1]"
+    translation:
+      xpath: "//text[@xml:lang='pl']/body"
+    breadcrumbs:
+      view: single
+      user.header: letter
+      xpath: //teiHeader
 assets:
   "css/theme.css": "{{remote}}resources/css/theme.css"
+  "images/tei-publisher-logo-color.svg": "{{remote}}resources/images/tei-publisher-logo-color.svg"
+  "images/tei-publisher-logo-contrast-color.svg": "{{remote}}resources/images/tei-publisher-logo-contrast-color.svg"

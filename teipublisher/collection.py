@@ -23,7 +23,7 @@ def fetch(config: Config, path: str, clear: bool = False, start: int = 1):
         resp.encoding = "UTF-8"
         content = resp.text
         f.write(content)
-        children = _expand(content, path, config, output)
+        children = _expand(content, path, config, config.baseDir)
         subcols += children['collections']
         documents += children['documents']
 

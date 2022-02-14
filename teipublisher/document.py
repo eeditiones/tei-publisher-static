@@ -21,20 +21,20 @@ def fetch(config: Config, doc: str, clear: bool = False):
     output = createDirectory(config.baseDir, doc, clear)
     mapping = _loadMap(output)
     
-    typer.echo(f"Fetching {meta['doc']} using template {meta.get('template')}, ODD {meta.get('odd')} and view {meta.get('view')} ...")
     template = _initTemplate(meta, output)
+    typer.echo(f"Fetching {meta['doc']} using template {template}, ODD {meta.get('odd')} and view {meta.get('view')} ...")
 
     requestConfigs = config.templates.get(template) or { 'main': None }
 
     page = len(mapping)
-    for name in requestConfigs:
-        typer.echo(f"Generating view '{typer.style(name, fg=typer.colors.GREEN)}'...")
+    for view in requestConfigs:
+        typer.echo(f"Generating view '{typer.style(view, fg=typer.colors.GREEN)}'...")
 
-        cfg = requestConfigs.get(name)
+        cfg = requestConfigs.get(view)
         if isinstance(cfg, str):
-            path = Path(output, name)
+            path = Path(output, view)
             _load(cfg, path, meta)
-            mapping[cfg] = name
+            mapping[cfg] = view
         else:
             requestParams = {
                 'odd': meta['odd'],
@@ -45,20 +45,21 @@ def fetch(config: Config, doc: str, clear: bool = False):
 
             uri = f"{config.baseUri}/api/parts/{quote_plus(doc)}/json"
 
-            next = _retrieve(uri, requestParams, page, mapping, output)
+            page += 1
+            next = _retrieve(uri, requestParams, view, page, mapping, output)
             while next:
                 page += 1
-                next = _retrieve(uri, requestParams, page, mapping, output, next)
+                next = _retrieve(uri, requestParams, view, page, mapping, output, next)
             typer.echo("\n")
     _save(output, mapping)
 
-def _retrieve(uri: str, params: dict, page: int, mapping: dict, output: Path, root: str = None):
+def _retrieve(uri: str, params: dict, view: str, page: int, mapping: dict, output: Path, root: str = None):
     if root:
         params['root'] = root
 
     resp = requests.get(uri, params=params)
     data = resp.json()
-    fileName = f"{page}.json"
+    fileName = f"{view}-{page}.json"
     file = Path(output, fileName)
     typer.echo(f"\rWriting page: {typer.style(str(page), fg=typer.colors.BLUE)}", nl=False)
     with (open(file, 'w')) as f:
@@ -124,4 +125,4 @@ def _initTemplate(meta: dict, output: Path):
     content = template.render(params)
     with open(Path(output, 'index.html'), "w") as f:
         f.write(content)
-    return templateName
+    return template.name

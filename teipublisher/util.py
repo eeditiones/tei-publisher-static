@@ -20,7 +20,7 @@ class Config:
         self.baseDir = baseDir
         with open(config, 'r') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
-            self.baseUri = data.get('baseUri') or baseUri
+            self.baseUri = data.get('remote') or baseUri
             self.baseDir = data.get('baseDir') or baseDir
             self.templates = data.get('templates')
             self.assets = data.get('assets')
@@ -29,6 +29,7 @@ class Config:
         if self.assets:
             for asset in self.assets:
                 outputPath = Path(self.baseDir, asset)
+                print(f"writing {self.baseDir}")
                 makedirs(outputPath.parent, exist_ok=True)
                 
                 url = expandTemplateString(self.assets[asset], {
