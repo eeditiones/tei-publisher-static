@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+        <link rel="shortcut icon" type="image/x-icon" href="resources/images/favicon.ico">
+        <link rel="shortcut icon" type="image/png" href="resources/images/favicon-16.png" sizes="16x16">
+        <link rel="shortcut icon" type="image/png" href="resources/images/favicon-24.png" sizes="24x24">
+        <link rel="shortcut icon" type="image/png" href="resources/images/favicon-32.png" sizes="32x32">
+        <link rel="shortcut icon" type="image/png" href="resources/images/favicon-64.png" sizes="64x64">
+
+        <title>Documentation</title>
+        <meta name="description" content="Documentation">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald&amp;display=swap">
+        <link rel="stylesheet" href="css/theme.css">
+        <script defer src="https://unpkg.com/@webcomponents/webcomponentsjs@2.4.3/webcomponents-loader.js"></script>
+        <script defer src="https://unpkg.com/web-animations-js@2.3.2/web-animations-next-lite.min.js"></script>
+        <script type="module" src="http://localhost:8000/src/pb-components-bundle.js"></script>
+        <style>
+            main {
+                max-width: 41.24rem;
+                margin: 0 auto;
+            }
+
+            .documents {
+                list-style: none;
+            }
+
+            .documents a,
+            .documents a:visited {
+                color: #303F9F;
+                text-decoration: none;
+            }
+            
+            .documents li {
+                display: flex;
+                flex-direction: row;
+                margin-bottom: 10px;
+                padding: 6px 0;
+                border-bottom: thin solid var(--paper-grey-300);
+            }
+            
+            .documents li:last-child {
+                border: none;
+            }
+
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                font-family: var(--pb-base-font-family);
+                font-weight: 400 !important;
+                line-height: 1.2;
+            }
+            
+            h5 {
+                font-size: 16px;
+                margin: 0;
+            }
+        </style>
+    </head>
+
+    <body>
+        <pb-page api-version="1.0.0" unresolved="unresolved">
+            <app-header-layout>
+                <app-header slot="header" reveals="reveals" fixed="fixed" effects="waterfall">
+                    <app-toolbar class="menubar">
+                        <a href="${app}/home.html" class="logo" data-template="pages:parse-params"></a>
+                        <pb-login id="login" group="tei"></pb-login>
+                    </app-toolbar>
+                </app-header>
+
+                <main>
+                    <pb-browse-docs id="document-list" class="noscroll" static auto>
+                        <pb-paginate slot="toolbar" id="paginate" per-page="10" range="5"></pb-paginate>
+                    </pb-browse-docs>
+                </main>
+            </app-header-layout>
+        </pb-page>
+        <div class="splash"></div>
+    </body>
+</html>

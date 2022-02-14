@@ -1,0 +1,22 @@
+remote: "http://localhost:8080/exist/apps/tei-publisher/"
+templates:
+  view.html:
+    main:
+    title:
+      view: single
+      xpath: //teiHeader/fileDesc/titleStmt
+      user.mode: title
+  facsimile.html:
+    main:
+    title:
+      view: single
+      xpath: //teiHeader/fileDesc/titleStmt
+      user.mode: title
+  documentation.html:
+    main:
+    breadcrumbs:
+      user.mode: breadcrumbs
+    toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=false"
+    documentation.css: "{{remote}}templates/pages/documentation.css"
+assets:
+  "css/theme.css": "{{remote}}resources/css/theme.css"

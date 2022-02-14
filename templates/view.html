@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+        <link rel="shortcut icon" type="image/x-icon" href="resources/images/favicon.ico">
+        <link rel="shortcut icon" type="image/png" href="resources/images/favicon-16.png" sizes="16x16">
+        <link rel="shortcut icon" type="image/png" href="resources/images/favicon-24.png" sizes="24x24">
+        <link rel="shortcut icon" type="image/png" href="resources/images/favicon-32.png" sizes="32x32">
+        <link rel="shortcut icon" type="image/png" href="resources/images/favicon-64.png" sizes="64x64">
+
+        <title>Documentation</title>
+        <meta name="description" content="Documentation">
+        {% include 'includes.html' %}
+        <style>
+            @media (min-width: 769px) {
+                .toolbar pb-navigation {
+                    display: none;
+                }
+            }
+
+            .content-body {
+                position: relative;
+                display: flex;
+                justify-content: center;
+            }
+
+            .content-body pb-navigation {
+                position: fixed;
+                bottom: 45%;
+                --paper-fab-background: #35424b;
+                color: white;
+            }
+
+            .content-body pb-navigation[direction=backward] {
+                left: 20px;
+            }
+
+            .content-body pb-navigation[direction=forward] {
+                right: 20px;
+            }
+
+            @media (max-width: 769px) {
+                .content-body pb-navigation {
+                    display: none;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <pb-page api-version="1.0.0" unresolved="unresolved">
+            <pb-document id="document1" path="{{doc}}" view="{{view}}" odd="{{odd}}"></pb-document>
+            <app-header-layout>
+                <app-header slot="header" reveals="reveals" fixed="fixed" effects="waterfall">
+                    <app-toolbar class="menubar" sticky="sticky">
+                        <a href="${app}/home.html" class="logo" data-template="pages:parse-params"></a>
+                    </app-toolbar>
+                    {% include 'toolbar.html' %}
+                </app-header>
+
+                <section class="breadcrumbs">
+                    <pb-view id="title-view1" src="document1" xpath="//teiHeader/fileDesc/titleStmt" view="single" static>
+                        <pb-param name="mode" value="title"/>
+                    </pb-view>
+                </section>
+                <main class="content-body">
+                    <pb-navigation direction="backward" unit="page" emit="transcription"
+                        subscribe="transcription" keyboard="left">
+                        <paper-fab icon="icons:chevron-left"/>
+                    </pb-navigation>
+                    <pb-view id="view1" src="document1"
+                        {% if xpath %}
+                        xpath="{{xpath}}"
+                        {% endif %}
+                        subscribe="transcription" emit="transcription"
+                        wait-for="toc" static></pb-view>
+                    <pb-navigation direction="forward" unit="page" emit="transcription"
+                        subscribe="transcription" keyboard="right">
+                        <paper-fab icon="icons:chevron-right"/>
+                    </pb-navigation>
+                </main>
+            </app-header-layout>
+        </pb-page>
+        <div class="splash"></div>
+    </body>
+</html>
