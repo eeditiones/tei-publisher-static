@@ -28,6 +28,14 @@ Once you generated the collections, you can also update a single document:
 python3 main.py document test/F-rom.xml -d
 ```
 
+### Launch a Simple Webserver
+
+To see the result you can launch the built-in webserver of Python:
+
+```sh
+python3 -m http.server --directory static 8001
+```
+
 ## How does it work?
 
 The generator first traverses the collection hierarchy recursively, downloading the HTML view for each page of documents to show. The retrieved content is stored into `static/collections`. It then inspects the HTML to collect the documents to be fetched.

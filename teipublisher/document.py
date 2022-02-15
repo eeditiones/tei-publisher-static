@@ -1,10 +1,9 @@
-from teipublisher.util import createDirectory, expandTemplateString, Config
+from teipublisher.util import createDirectory, expandTemplateString, expandTemplate, Config
 import typer
 from pathlib import Path
 import json
 import requests
 from urllib.parse import quote_plus
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 def fetch(config: Config, doc: str, clear: bool = False):
     typer.echo(f"Processing {typer.style(doc, typer.colors.MAGENTA)}...")
@@ -14,14 +13,13 @@ def fetch(config: Config, doc: str, clear: bool = False):
         return
     
     meta['doc'] = quote_plus(doc)
-    meta['remote'] = config.baseUri
-    meta['components'] = config.components
-    
+    meta = { **meta, **config.variables }
+
     _checkCSS(meta, config.baseUri, config.baseDir)
     output = createDirectory(config.baseDir, doc, clear)
     mapping = _loadMap(output)
     
-    template = _initTemplate(meta, output)
+    template = expandTemplate((meta.get('template'), 'view.html'), meta, output)
     typer.echo(f"Fetching {meta['doc']} using template {template}, ODD {meta.get('odd')} and view {meta.get('view')} ...")
 
     requestConfigs = config.templates.get(template) or { 'main': None }
@@ -102,6 +100,8 @@ def _checkCSS(meta: dict, baseUri: str, baseDir: Path):
                     f.write(resp.text)
             else:
                 typer.echo(typer.style(f"Stylesheet {file} not found", fg=typer.colors.CYAN))
+    else:
+        print('No ODD found')
 
 def _getKey(params: dict):
     encParams = []
@@ -113,16 +113,3 @@ def _save(output, mapping):
     mapFile = Path(output, 'index.json')
     with open(mapFile, 'w') as f:
         json.dump(mapping, f, ensure_ascii=False, indent=4)
-
-def _initTemplate(meta: dict, output: Path):
-    env = Environment(loader=FileSystemLoader(searchpath="templates"), autoescape=select_autoescape)
-    templateName = meta.get('template') or 'view.html'
-    # try to find template according to document configuration
-    template = env.select_template((templateName, 'view.html'))
-    typer.echo(f"Using template {typer.style(template.name, typer.colors.MAGENTA)}.")
-    params = dict(meta)
-    params['odd'] = meta['odd'][:-4]
-    content = template.render(params)
-    with open(Path(output, 'index.html'), "w") as f:
-        f.write(content)
-    return template.name

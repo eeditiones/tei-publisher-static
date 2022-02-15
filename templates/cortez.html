@@ -4,31 +4,37 @@
         {% include 'includes.html' %}
         <style>
             body {
-                --pb-view-height: calc(100vh - 212px);
+                --pb-view-height: calc(100vh - 210px);
             }
-    
-            #view1 {
+
+            #view1,
+            #view2 {
                 flex: 1 1;
-                height: var(--pb-view-height);
+                max-width: 60vw;
+                margin: 0 16px;
+                min-height: var(--pb-view-height);
+                max-height: var(--pb-view-height);
                 overflow: auto;
             }
-    
+
             .content-body {
                 position: relative;
                 display: flex;
                 justify-content: center;
                 padding: 0 20px;
             }
-    
+
+            .content-body pb-view {
+                flex: 1 1;
+            }
+
             .content-body pb-facsimile {
                 flex: 1 1;
                 --pb-facsimile-height: var(--pb-view-height);
             }
-    
-            @media (max-width: 769px) {
-                pb-facsimile {
-                    display: none;
-                }
+
+            .toc-toggle {
+                display: none;
             }
         </style>
     </head>
@@ -42,24 +48,22 @@
                     {% include 'toolbar.html' %}
                 </app-header>
 
-                {% include 'toc.html' %}
                 <section class="breadcrumbs">
-                    <pb-view id="title-view1" src="document1" xpath="//teiHeader/fileDesc/titleStmt" view="single" static>
-                        <pb-param name="mode" value="title"/>
+                    <pb-view id="title-view1" src="document1" xpath="//teiHeader" view="single" static>
+                        <pb-param name="mode" value="title"></pb-param>
                     </pb-view>
                 </section>
                 <main class="content-body">
-                    <pb-view id="view1" src="document1"
-                        {% if xpath %}
-                        xpath="{{xpath}}"
-                        {% endif %}
-                        subscribe="transcription" emit="transcription"
-                        column-separator=".tei-cb"
-                        wait-for="toc" static></pb-view>
+                    <pb-view id="view1" src="document1" xpath="//text[@type='source']" column-separator=".tei-cb"
+                        append-footnotes="append-footnotes" subscribe="transcription" emit="transcription"
+                        wait-for="#facsimile" static></pb-view>
                     <pb-facsimile id="facsimile" base-uri="https://apps.existsolutions.com/cantaloupe/iiif/2/"
                         default-zoom-level="0" show-navigation-control="show-navigation-control"
                         show-navigator="show-navigator"
-                        subscribe="transcription" />
+                        subscribe="transcription"></pb-facsimile>
+                    <pb-view id="view2" src="document1" map="cortez-translation" xpath="//text[@type='source']"
+                        subscribe="transcription" column-separator=".tei-cb" append-footnotes="append-footnotes"
+                        static></pb-view>
                 </main>
             </app-header-layout>
         </pb-page>

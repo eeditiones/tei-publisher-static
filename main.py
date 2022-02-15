@@ -1,10 +1,11 @@
+from os import makedirs
 from typing import Optional
 import typer
 from pathlib import Path
 from shutil import rmtree
 import teipublisher.document
 import teipublisher.collection
-from teipublisher.util import Config
+from teipublisher.util import Config, expandTemplate
 
 app = typer.Typer()
 
@@ -31,6 +32,9 @@ def collection(
 ):
     config = Config(configFile, baseUri, outDir)
     config.loadAssets()
+
+    makedirs(outDir, exist_ok=True)
+    expandTemplate(['index.html'], config.variables, outDir)
     documents = teipublisher.collection.fetch(config, path)
     if recurse:
         for doc in documents:
@@ -40,10 +44,7 @@ def collection(
 def clean(
     outDir: Optional[Path] = typer.Option('static', help='Output directory'),
 ):
-    path = Path(outDir)
-    for file in path.iterdir():
-        if file.is_dir():
-            rmtree(file)
+    rmtree(outDir)
 
 if __name__ == "__main__":
     app()

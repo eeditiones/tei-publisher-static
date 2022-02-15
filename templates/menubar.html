@@ -1,0 +1,11 @@
+<app-toolbar class="menubar" sticky="sticky">
+    <a href="/index.html" class="logo" data-template="pages:parse-params"></a>
+    <pb-media-query query="min-width: 1024px">
+        <!-- language selector -->
+        <pb-lang name="lang">
+            {% for key, value in languages | dictsort %}
+            <paper-item value="{{key}}">{{value}}</paper-item>
+            {% endfor %}
+        </pb-lang>
+     </pb-media-query>
+</app-toolbar>

@@ -1,16 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <html>
     <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
-        <link rel="shortcut icon" type="image/x-icon" href="resources/images/favicon.ico">
-        <link rel="shortcut icon" type="image/png" href="resources/images/favicon-16.png" sizes="16x16">
-        <link rel="shortcut icon" type="image/png" href="resources/images/favicon-24.png" sizes="24x24">
-        <link rel="shortcut icon" type="image/png" href="resources/images/favicon-32.png" sizes="32x32">
-        <link rel="shortcut icon" type="image/png" href="resources/images/favicon-64.png" sizes="64x64">
-
-        <title>Documentation</title>
-        <meta name="description" content="Documentation">
         {% include 'includes.html' %}
         <style>
             @media (min-width: 769px) {
@@ -53,20 +43,11 @@
             <pb-document id="document1" path="{{doc}}" view="{{view}}" odd="{{odd}}"></pb-document>
             <app-header-layout>
                 <app-header slot="header" reveals="reveals" fixed="fixed" effects="waterfall">
-                    <app-toolbar class="menubar" sticky="sticky">
-                        <a href="${app}/home.html" class="logo" data-template="pages:parse-params"></a>
-                    </app-toolbar>
+                    {% include 'menubar.html' %}
                     {% include 'toolbar.html' %}
                 </app-header>
 
-                <pb-drawer toggle="tocToggle" class="toc" emit="toc" subscribe="transcription">
-                    <div class="drawer-content">
-                        <h3>
-                            <pb-i18n key="document.contents">Contents</pb-i18n>
-                        </h3>
-                        <pb-load id="toc" url="toc.html" src="document1" expand="expand" subscribe="toc" load-once="load-once"><pb-i18n key="dialogs.loading">Loading</pb-i18n></pb-load>
-                    </div>
-                </pb-drawer>
+                {% include 'toc.html' %}
                 <section class="breadcrumbs">
                     <pb-view id="title-view1" src="document1" xpath="//teiHeader/fileDesc/titleStmt" view="single" static>
                         <pb-param name="mode" value="title"/>
