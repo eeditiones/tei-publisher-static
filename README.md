@@ -2,7 +2,14 @@
 
 **Work in Progress** - status: functional, but not complete.
 
-This repository contains a static site generator for TEI Publisher. It can basically create a static version of a website by pre-generating all content. It does so by traversing the site's content via TEI Publishers public API. The result is a website without dynamic content: neither eXist-db nor TEI Publisher are required.
+This repository contains a static site generator for TEI Publisher. It can basically create a static version of a website by pre-generating all content. It does so by traversing the site's content via TEI Publishers public API, transforming all documents via the associated ODDs and storing the output into the file system. The result is a website without dynamic content: neither eXist-db nor TEI Publisher are required.
+
+Obviously the generated website will lack some of the functionality, which requires a database backend, in particular:
+
+* no search facility
+* no facetted browsing
+
+On the upside, the resulting HTML files can be hosted on any webserver at small or no cost (e.g. using github pages). Most web components and page layouts will still work as before. A static site is thus a viable option for small editions with a strong focus on the text presentation and requiring less advanced features.
 
 ## Installation
 
@@ -25,7 +32,7 @@ The `--recursive` option will automatically fetch the content of all documents. 
 Once you generated the collections, you can also update a single document:
 
 ```sh
-python3 main.py document test/F-rom.xml -d
+python3 main.py document test/F-rom.xml
 ```
 
 ### Launch a Simple Webserver
@@ -50,9 +57,12 @@ For each document, the generator performs the following operations:
 
 ## Templates
 
-Because the result should be a static website, the HTML templates used are necessarily different than the ones within TEI Publisher, though it should be easy enough to copy/paste and then modify the relevant bits.
+Because the result should be a static website, the HTML templates used are necessarily different than the ones within TEI Publisher, though it should be easy enough to copy/paste and then modify the relevant bits. The static templates use the [Jinja](https://jinja.palletsprojects.com/en/3.0.x/templates/) templating framework.
 
-The static templates use the [Jinja](https://jinja.palletsprojects.com/en/3.0.x/templates/) templating framework.
+The existing templates in `templates` have been directly copied from TEI Publisher and then modified to match the different templating framework. When copying HTML, it is important to pay attention to the following caveats:
+
+* while the HTML templates in TEI Publisher must be valid XHTML, the static templates are HTML5. You should thus not use closed empty elements. For example, `<pb-param name="..." value="..."/>` should be changed to `<pb-param name="..." value="..."></pb-param>`. Also, auto-closing HTML elements like `<link>` should not be closed with `</link>`
+* add an additional attribute `static` to any `pb-view` and `pb-load` web component, instructing the components to rewrite URLs in order to retrieve content from a static server
 
 ## Configuration
 
@@ -68,3 +78,14 @@ documentation.html:
 ```
 
 Here the main text view does not require additional parameters, which are thus left empty. However, the page includes a `pb-view` for breadcrumbs and this needs to set the parameter `mode` to `breadcrumbs`. There's also a `pb-load` for the table of contents, which only needs to be retrieved once for the document and is stored into `doc.html`. Finally, we download some additional CSS and store it as well.
+
+You can use any of the variables declared in the `variables` section of `config.yml` as well as the variables `doc`, `odd` and `view`, which are set to the corresponding values reported by the server for the current document.
+
+The general approach to take when converting a working HTML template from TEI Publisher is as follows:
+
+1. create a static template by copying/pasting the relevant bits from your TEI Publisher template, obeying the rules given above (see 'Templates')
+2. in `config.yml` add an entry below `templates` with the name of your template
+3. for each `pb-view` in the template add a view configuration as shown for `documentation.html` above:
+   * every `pb-param` should be defined as a request param, prefixed by `user.`
+   * if your `pb-view` uses a different ODD or view than the one defined as default for the document, add it as parameter as well
+4. for each `pb-load`, create an additional mapping using the original URL as value and an arbitrary filename as key (e.g. `toc.html`), then use this key as the `@url` attribute of `pb-param`
