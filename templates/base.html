@@ -25,6 +25,7 @@
         {% else %}
         <script type="module" src="{{cdn}}@{{components}}/dist/pb-components-bundle.js"></script>
         {% endif %}
+        {% block scripts %}{% endblock scripts %}
     </head>
     <body>
         <pb-page api-version="1.0.0" unresolved="unresolved">

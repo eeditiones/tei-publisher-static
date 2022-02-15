@@ -43,6 +43,14 @@ templates:
       xpath: //teiHeader/fileDesc/titleStmt/title
       user.header: short
     toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=true"
+  letter.html:
+    main:
+    title:
+      view: single
+      xpath: //teiHeader/fileDesc/titleStmt/title
+      user.header: short
+    places:
+      user.mode: facets
   facsimile.html:
     main:
     title:
