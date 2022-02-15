@@ -1,4 +1,5 @@
 variables:
+  title: "TEI Publisher"
   remote: "http://localhost:8080/exist/apps/tei-publisher/"
   # components: 1.34.1
   components: dev
@@ -35,6 +36,13 @@ templates:
       xpath: //teiHeader/fileDesc/titleStmt
       user.mode: title
     toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=true"
+  dta.html:
+    main:
+    title:
+      view: single
+      xpath: //teiHeader/fileDesc/titleStmt/title
+      user.header: short
+    toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=true"
   facsimile.html:
     main:
     title:
@@ -58,6 +66,16 @@ templates:
       user.header: letter
       xpath: //teiHeader
   cortez.html:
+    transcription:
+      xpath: "//text[@type='source']"
+    translation:
+      xpath: "//text[@type='source']"
+      map: cortez-translation
+    title:
+      view: single
+      xpath: //teiHeader
+      user.mode: title
+  cortez-with-translation.html:
     transcription:
       xpath: "//text[@type='source']"
     translation:

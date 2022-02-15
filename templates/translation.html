@@ -1,47 +1,35 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<html>
-    <head>
-        {% include 'includes.html' %}
-        <style>
-            @media (min-width: 769px) {
-                .toolbar pb-navigation {
-                    display: none;
-                }
-            }
+{% extends 'base.html' %}
+{% block styles %}
+<style>
+    .toolbar pb-navigation {
+        display: none;
+    }
 
-            .content-body {
-                position: relative;
-                display: flex;
-                justify-content: center;
-            }
-        </style>
-    </head>
+    .content-body {
+        position: relative;
+        display: flex;
+        justify-content: center;
+    }
 
-    <body>
-        <pb-page api-version="1.0.0" unresolved="unresolved">
-            <pb-document id="document1" path="{{doc}}" view="{{view}}" odd="{{odd}}"></pb-document>
-            <app-header-layout>
-                <app-header slot="header" reveals="reveals" fixed="fixed" effects="waterfall">
-                    {% include 'menubar.html' %}
-                    {% include 'toolbar.html' %}
-                </app-header>
+    .toc-toggle {
+        display: none;
+    }
+</style>
+{% endblock styles %}
 
-                <section class="breadcrumbs">
-                    <pb-view id="title-view1" src="document1" xpath="//teiHeader" view="single" static>
-                        <pb-param name="header" value="letter"></pb-param>
-                    </pb-view>
-                </section>
-                <main class="content-body">
-                    <pb-view id="view1" src="document1"
-                        xpath="! (.//text[@xml:lang = 'la']/body | .//text/body)[1]"
-                        column-separator=".tei-cb" append-footnotes="append-footnotes"
-                        subscribe="transcription" emit="transcription" static></pb-view>
-                    <pb-view id="view2" src="document1"
-                        xpath="//text[@xml:lang='pl']/body" subscribe="transcription"
-                        column-separator=".tei-cb" append-footnotes="append-footnotes" static></pb-view>
-                </main>
-            </app-header-layout>
-        </pb-page>
-        <div class="splash"></div>
-    </body>
-</html>
+{% block content %}
+<section class="breadcrumbs">
+    <pb-view id="title-view1" src="document1" xpath="//teiHeader" view="single" static>
+        <pb-param name="header" value="letter"></pb-param>
+    </pb-view>
+</section>
+<main class="content-body">
+    <pb-view id="view1" src="document1"
+        xpath="! (.//text[@xml:lang = 'la']/body | .//text/body)[1]"
+        column-separator=".tei-cb" append-footnotes="append-footnotes"
+        subscribe="transcription" emit="transcription" static></pb-view>
+    <pb-view id="view2" src="document1"
+        xpath="//text[@xml:lang='pl']/body" subscribe="transcription"
+        column-separator=".tei-cb" append-footnotes="append-footnotes" static></pb-view>
+</main>
+{% endblock content %}

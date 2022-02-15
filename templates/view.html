@@ -1,77 +1,63 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<html>
-    <head>
-        {% include 'includes.html' %}
-        <style>
-            @media (min-width: 769px) {
-                .toolbar pb-navigation {
-                    display: none;
-                }
-            }
+{% extends 'base.html' %}
+{% block styles %}
+<style>
+    @media (min-width: 769px) {
+        .toolbar pb-navigation {
+            display: none;
+        }
+    }
 
-            .content-body {
-                position: relative;
-                display: flex;
-                justify-content: center;
-            }
+    .content-body {
+        position: relative;
+        display: flex;
+        justify-content: center;
+    }
 
-            .content-body pb-navigation {
-                position: fixed;
-                bottom: 45%;
-                --paper-fab-background: #35424b;
-                color: white;
-            }
+    .content-body pb-navigation {
+        position: fixed;
+        bottom: 45%;
+        --paper-fab-background: #35424b;
+        color: white;
+    }
 
-            .content-body pb-navigation[direction=backward] {
-                left: 20px;
-            }
+    .content-body pb-navigation[direction=backward] {
+        left: 20px;
+    }
 
-            .content-body pb-navigation[direction=forward] {
-                right: 20px;
-            }
+    .content-body pb-navigation[direction=forward] {
+        right: 20px;
+    }
 
-            @media (max-width: 769px) {
-                .content-body pb-navigation {
-                    display: none;
-                }
-            }
-        </style>
-    </head>
+    @media (max-width: 769px) {
+        .content-body pb-navigation {
+            display: none;
+        }
+    }
+</style>
+{% endblock styles %}
 
-    <body>
-        <pb-page api-version="1.0.0" unresolved="unresolved">
-            <pb-document id="document1" path="{{doc}}" view="{{view}}" odd="{{odd}}"></pb-document>
-            <app-header-layout>
-                <app-header slot="header" reveals="reveals" fixed="fixed" effects="waterfall">
-                    {% include 'menubar.html' %}
-                    {% include 'toolbar.html' %}
-                </app-header>
-
-                {% include 'toc.html' %}
-                <section class="breadcrumbs">
-                    <pb-view id="title-view1" src="document1" xpath="//teiHeader/fileDesc/titleStmt" view="single" static>
-                        <pb-param name="mode" value="title"/>
-                    </pb-view>
-                </section>
-                <main class="content-body">
-                    <pb-navigation direction="backward" unit="page" emit="transcription"
-                        subscribe="transcription" keyboard="left">
-                        <paper-fab icon="icons:chevron-left"/>
-                    </pb-navigation>
-                    <pb-view id="view1" src="document1"
-                        {% if xpath %}
-                        xpath="{{xpath}}"
-                        {% endif %}
-                        subscribe="transcription" emit="transcription"
-                        column-separator=".tei-cb"
-                        wait-for="toc" static></pb-view>
-                    <pb-navigation direction="forward" unit="page" emit="transcription"
-                        subscribe="transcription" keyboard="right">
-                        <paper-fab icon="icons:chevron-right"/>
-                    </pb-navigation>
-                </main>
-            </app-header-layout>
-        </pb-page>
-        <div class="splash"></div>
-    </body>
-</html>
+{% block content %}
+    {% include 'toc.html' %}
+    <section class="breadcrumbs">
+        <pb-view id="title-view1" src="document1" xpath="//teiHeader/fileDesc/titleStmt" view="single" static>
+            <pb-param name="mode" value="title"/>
+        </pb-view>
+    </section>
+    <main class="content-body">
+        <pb-navigation direction="backward" unit="page" emit="transcription"
+            subscribe="transcription" keyboard="left">
+            <paper-fab icon="icons:chevron-left"/>
+        </pb-navigation>
+        <pb-view id="view1" src="document1"
+            {% if xpath %}
+            xpath="{{xpath}}"
+            {% endif %}
+            subscribe="transcription" emit="transcription"
+            column-separator=".tei-cb"
+            wait-for="toc" static></pb-view>
+        <pb-navigation direction="forward" unit="page" emit="transcription"
+            subscribe="transcription" keyboard="right">
+            <paper-fab icon="icons:chevron-right"/>
+        </pb-navigation>
+    </main>
+{% endblock content %}

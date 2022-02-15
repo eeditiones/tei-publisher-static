@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+    <style>
+        body {
+            --pb-view-height: calc(100vh - 184px);
+        }
+
+        #view1 {
+            flex: 1 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        #view1 pb-view {
+            height: var(--pb-view-height);
+            overflow: auto;
+        }
+
+        .content-body {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            padding: 0 20px;
+        }
+
+        .content-body pb-facsimile {
+            flex: 1 1;
+            --pb-facsimile-height: calc(var(--pb-view-height) - 22px);
+        }
+
+        @media (max-width: 769px) {
+            pb-facsimile {
+                display: none;
+            }
+        }
+    </style>
+{% endblock styles %}
+
+{% block content %}
+    {% include 'toc.html' %}
+    <section class="breadcrumbs">
+        <pb-view id="title-view1" src="document1" xpath="//teiHeader/fileDesc/titleStmt/title" view="single" static>
+            <pb-param name="header" value="short"></pb-param>
+        </pb-view>
+    </section>
+    <main class="content-body">
+        <div id="view1">
+            <pb-view src="document1" column-separator=".tei-cb" append-footnotes="append-footnotes"
+                subscribe="transcription" emit="transcription" wait-for="#facsimile" static></pb-view>
+        </div>
+        <pb-facsimile id="facsimile" base-uri="https://media.dwds.de/dta/images/"
+            type="image"
+            default-zoom-level="0" show-navigation-control="show-navigation-control"
+            show-navigator="show-navigator"
+            subscribe="transcription">
+        </pb-facsimile>
+    </main>
+{% endblock content %}

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+        <link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico">
+        <link rel="shortcut icon" type="image/png" href="/images/favicon-16.png" sizes="16x16">
+        <link rel="shortcut icon" type="image/png" href="/images/favicon-24.png" sizes="24x24">
+        <link rel="shortcut icon" type="image/png" href="/images/favicon-32.png" sizes="32x32">
+        <link rel="shortcut icon" type="image/png" href="/images/favicon-64.png" sizes="64x64">
+
+        <title>{{title}}</title>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald&amp;display=swap">
+        <link rel="stylesheet" href="/css/theme.css">
+        {% if odd %}
+        <link rel="stylesheet" href="/css/{{odd}}.css">
+        {% endif %}
+
+        {% block styles %}{% endblock %}
+
+        <script defer src="https://unpkg.com/@webcomponents/webcomponentsjs@2.4.3/webcomponents-loader.js"></script>
+        <script defer src="https://unpkg.com/web-animations-js@2.3.2/web-animations-next-lite.min.js"></script>
+        {% if components == 'dev' %}
+        <script type="module" src="{{cdn}}/src/pb-components-bundle.js"></script>
+        {% else %}
+        <script type="module" src="{{cdn}}@{{components}}/dist/pb-components-bundle.js"></script>
+        {% endif %}
+    </head>
+    <body>
+        <pb-page api-version="1.0.0" unresolved="unresolved">
+            <pb-document id="document1" path="{{doc}}" view="{{view}}" odd="{{odd}}"></pb-document>
+            <app-header-layout>
+                <app-header slot="header" reveals="reveals" fixed="fixed" effects="waterfall">
+                    <app-toolbar class="menubar" sticky="sticky">
+                        <a href="/index.html" class="logo" data-template="pages:parse-params"></a>
+                        <pb-media-query query="min-width: 1024px">
+                            <!-- language selector -->
+                            <pb-lang name="lang">
+                                {% for key, value in languages | dictsort %}
+                                <paper-item value="{{key}}">{{value}}</paper-item>
+                                {% endfor %}
+                            </pb-lang>
+                         </pb-media-query>
+                    </app-toolbar>
+                    <app-toolbar class="toolbar" sticky="sticky">
+                        <paper-icon-button id="tocToggle" class="toc-toggle" icon="icons:view-list"></paper-icon-button>
+                        <a id="toolbar-parent" href="/?collection={{collection}}">
+                            <paper-icon-button icon="icons:folder-open"></paper-icon-button>
+                        </a>
+                        {% block toolbar_start %}{% endblock %}
+                        <pb-zoom emit="transcription" direction="in" icon="icons:zoom-in"></pb-zoom>
+                        <pb-zoom emit="transcription" direction="out" icon="icons:zoom-out"></pb-zoom>
+                        <pb-navigation emit="transcription" keyboard="left"
+                            subscribe="transcription" direction="backward" unit="page">
+                            <paper-icon-button icon="icons:chevron-left"></paper-icon-button>
+                        </pb-navigation>
+                        <pb-navigation emit="transcription" keyboard="right"
+                            subscribe="transcription" direction="forward" unit="page">
+                            <paper-icon-button icon="icons:chevron-right"></paper-icon-button>
+                        </pb-navigation>
+                        <pb-progress subscribe="transcription" indeterminate="indeterminate" bottom-item="bottom-item"></pb-progress>
+                    </app-toolbar>
+                </app-header>
+                {% block content %}{% endblock %}
+            </app-header-layout>
+        </pb-page>
+        <div class="splash"></div>
+    </body>
+</html>

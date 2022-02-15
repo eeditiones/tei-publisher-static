@@ -3,7 +3,7 @@
 {% block styles %}
 <style>
     body {
-        --pb-view-height: calc(100vh - 210px);
+        --pb-view-height: calc(100vh - 192px);
     }
 
     #view1,
@@ -11,7 +11,6 @@
         flex: 1 1;
         max-width: 60vw;
         margin: 0 16px;
-        min-height: var(--pb-view-height);
         max-height: var(--pb-view-height);
         overflow: auto;
     }
@@ -27,16 +26,21 @@
         flex: 1 1;
     }
 
-    .content-body pb-facsimile {
-        flex: 1 1;
-        --pb-facsimile-height: var(--pb-view-height);
-    }
-
     .toc-toggle {
         display: none;
     }
 </style>
-{% endblock %}
+{% endblock styles %}
+
+{% block toolbar_start %}
+<pb-toggle-feature name="norm2" selector=".choice,.choice-alternate,br" emit="transcription" subscribe="transcription">
+    <pb-i18n key="document.normalized">Normalized View</pb-i18n>
+</pb-toggle-feature>
+<pb-toggle-feature name="highlight2" selector=".tei-foreign,pb-highlight,pb-popover"
+action="disable" default="off" emit="transcription" subscribe="transcription">
+    <pb-i18n key="document.plain">Plain Reading View</pb-i18n>
+</pb-toggle-feature>
+{% endblock toolbar_start %}
 
 {% block content %}
 <section class="breadcrumbs">
@@ -48,12 +52,8 @@
     <pb-view id="view1" src="document1" xpath="//text[@type='source']" column-separator=".tei-cb"
         append-footnotes="append-footnotes" subscribe="transcription" emit="transcription"
         wait-for="#facsimile" static></pb-view>
-    <pb-facsimile id="facsimile" base-uri="https://apps.existsolutions.com/cantaloupe/iiif/2/"
-        default-zoom-level="0" show-navigation-control="show-navigation-control"
-        show-navigator="show-navigator"
-        subscribe="transcription"></pb-facsimile>
     <pb-view id="view2" src="document1" map="cortez-translation" xpath="//text[@type='source']"
         subscribe="transcription" column-separator=".tei-cb" append-footnotes="append-footnotes"
         static></pb-view>
 </main>
-{% endblock %}
+{% endblock content %}
