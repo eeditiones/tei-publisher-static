@@ -2,7 +2,7 @@ from teipublisher.util import createDirectory, loadImages, Config
 import typer
 from pathlib import Path
 import requests
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urljoin
 from bs4 import BeautifulSoup
 
 def fetch(config: Config, path: str, clear: bool = False, start: int = 1):
@@ -51,7 +51,9 @@ def _expand(content, collectionPath: str, config: Config, output: Path):
     documents = []
     links = soup.select('.document a:not([data-collection])')
     for link in links:
-        documents.append(link['href'])
+        url = urljoin(config.baseUri, link['href'])
+        if url.startswith(config.baseUri):
+            documents.append(link['href'])
     return {
         'documents': documents,
         'collections': subcols
