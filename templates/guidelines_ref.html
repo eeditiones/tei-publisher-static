@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block styles %}
+<link rel="stylesheet" href="{{context}}/css/guidelines.css">
+{% endblock styles %}
+{% block content %}
+<main class="content-body">
+    <pb-view id="reference" src="document1" load-css="../../css/tei.css"
+        xpath="//(elementSpec | classSpec | macroSpec | attSpec | dataSpec)[@ident='{{ident}}']"
+        view="single" subscribe="transcription" fix-links="fixLinks" static="{{context}}">
+        <pb-param name="lng" value="en"/>
+        <pb-param name="mode" value="ref"/>
+    </pb-view>
+</main>
+{% endblock content %}

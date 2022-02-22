@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{context}}/css/guidelines.css">
+<style>
+@media (min-width: 769px) {
+    .toolbar pb-navigation {
+        display: none;
+    }
+}
+
+.content-body {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.content-body pb-navigation {
+    position: fixed;
+    bottom: 45%;
+    --paper-fab-background: #35424b;
+    color: white;
+}
+
+.content-body pb-navigation[direction=backward] {
+    left: 20px;
+}
+
+.content-body pb-navigation[direction=forward] {
+    right: 20px;
+}
+
+@media (max-width: 769px) {
+    .content-body pb-navigation {
+        display: none;
+    }
+}
+</style>
+{% endblock styles %}
+
+{% block content %}
+{% include 'toc.html' %}
+<section class="title">
+    <pb-view id="title-view1" src="document1" xpath="//teiHeader" view="single" static="{{context}}">
+        <pb-param name="mode" value="title"></pb-param>
+    </pb-view>
+</section>
+<section class="breadcrumbs">
+    <pb-view id="breadcrumbs" src="document1" subscribe="transcription" static="{{context}}">
+        <pb-param name="mode" value="breadcrumbs"></pb-param>
+    </pb-view>
+</section>
+<main class="content-body">
+    <pb-navigation direction="backward" unit="page" emit="transcription" subscribe="transcription">
+        <paper-fab icon="icons:chevron-left"/>
+    </pb-navigation>
+    <pb-view id="view1" src="document1" column-separator=".tei-cb" append-footnotes="append-footnotes" subscribe="transcription" emit="transcription" static="{{context}}">
+        <pb-param name="lng" value="en"></pb-param>
+    </pb-view>
+    <pb-navigation direction="forward" unit="page" emit="transcription" subscribe="transcription">
+        <paper-fab icon="icons:chevron-right"/>
+    </pb-navigation>           
+</main>
+{% endblock content %}

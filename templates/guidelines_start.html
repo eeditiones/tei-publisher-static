@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{context}}/css/guidelines.css">
+<style>
+    .panels {
+        display: grid;
+        grid-template-columns: auto auto auto;
+        justify-content: center;
+    }
+</style>
+{% endblock styles %}
+{% block document %}
+    <pb-document id="document1" path="p5.xml" view="div" odd="tei"></pb-document>
+{% endblock document %}
+
+{% block content %}
+<main>
+    <section class="breadcrumbs">
+        <pb-view id="title-view1" src="document1" xpath="//teiHeader" view="single" odd="tei" static="{{context}}">
+            <pb-param name="mode" value="title"></pb-param>
+        </pb-view>
+       
+    </section>
+
+    <section class="panels">
+        <div>
+            <div class="front">
+                <h1> Front Matter</h1>
+                <pb-view id="front" src="document1" xpath="//front" view="single" odd="tei" static="{{context}}">
+                    <pb-param name="mode" value="toc"></pb-param>
+                </pb-view>  
+            </div>
+            
+        </div>
+        <div>
+            <h1>Body</h1>
+                <pb-view id="front" src="document1" xpath="//body" view="single" odd="tei" static="{{context}}">
+                    <pb-param name="mode" value="toc"></pb-param>
+                </pb-view> 
+        </div>
+        <div>
+            <div class="back">
+                <h1> Back Matter</h1>
+                <pb-view id="back" src="document1" xpath="//back" view="single" odd="tei" static="{{context}}">
+                    <pb-param name="mode" value="toc"></pb-param>
+                </pb-view>  
+            </div>
+        </div>                   
+    </section>
+</main>
+<footer class="version">
+    App: v<span data-template="pages:version"/> /
+    web components: v<pb-version/>
+</footer>
+{% endblock content %}

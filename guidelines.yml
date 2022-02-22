@@ -1,0 +1,96 @@
+# Generates a static version of the TEI Guidelines
+variables:
+  title: "TEI P5: Guidelines for Electronic Text Encoding and Interchange"
+  remote: "http://localhost:8080/exist/apps/guidelines/"
+  context: "/guidelines"
+  components: 1.34.2
+  # components: dev
+  cdn: "https://unpkg.com/@teipublisher/pb-components"
+  # cdn: "http://localhost:8000"
+  languages:
+    "bg": "Български"
+    "cs": "Česky"
+    "zh_CN": "简体中文"
+    "zh_TW": "繁體中文"
+    "de": "Deutsch"
+    "en": "English"
+    "es": "Español"
+    "el": "ελληνικά"
+    "fr": "Français"
+    "fi": "Suomi"
+    "it": "Italiano"
+    "ka": "ქართული"
+    "nl": "Nederlands"
+    "no": "Norsk"
+    "pl": "Polski"
+    "pt": "Português"
+    "ro": "Română"
+    "ru": "русский"
+    "sl": "Slovenščina"
+    "sv": "Svenska"
+    "tr": "Türkçe"
+    "uk": "Українська"
+templates:
+  guidelines.html:
+    data:
+      main:
+        user.lng: en
+      title:
+        view: single
+        xpath: //teiHeader
+        user.mode: title
+      breadcrumbs:
+        user.mode: breadcrumbs
+      toc.html: "api/document/{{doc}}/contents?target=transcription&icons=true"
+  guidelines_start.html:
+    variables:
+    data:
+      title:
+        view: single
+        xpath: //teiHeader
+        user.mode: title
+      front:
+        view: single
+        xpath: //front
+        user.mode: toc
+      body:
+        view: single
+        xpath: //body
+        user.mode: toc
+      back:
+        view: single
+        xpath: //back
+        user.mode: toc
+  guidelines_ref.html:
+    variables:
+      odd: tei.odd
+      view: single
+    data:
+      main:
+        xpath: "//(elementSpec | classSpec | macroSpec | attSpec | dataSpec)[@ident='{{ident}}']"
+        user.lng: en
+        user.mode: ref
+        odd: tei.odd
+        view: single
+pages:
+  "":
+    template: guidelines_start.html
+    doc: p5.xml
+  "p5.xml":
+    template: guidelines.html
+    doc: p5.xml
+  "ref":
+    template: guidelines_ref.html
+    sequence: "api/idents"
+    output: "ref/{{ident}}"
+assets:
+  "css/theme.css": "{{remote}}resources/css/theme.css"
+  "ref/tei.css": "{{remote}}transform/tei.css"
+  "images/tei.png": "{{remote}}resources/images/tei.png"
+  "css/guidelines.css": "{{remote}}resources/css/guidelines.css"
+  "images/tei-publisher-logo-contrast-color.svg": "{{remote}}resources/images/tei-publisher-logo-contrast-color.svg"
+  "images/favicon-16.png": "{{remote}}resources/images/favicon-16.png"
+  "images/favicon-24.png": "{{remote}}resources/images/favicon-24.png"
+  "images/favicon-32.png": "{{remote}}resources/images/favicon-32.png"
+  "images/favicon-64.png": "{{remote}}resources/images/favicon-64.png"
+  "images/favicon.ico": "{{remote}}resources/images/favicon.ico"
