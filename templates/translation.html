@@ -19,7 +19,7 @@
 
 {% block content %}
 <section class="breadcrumbs">
-    <pb-view id="title-view1" src="document1" xpath="//teiHeader" view="single" static>
+    <pb-view id="title-view1" src="document1" xpath="//teiHeader" view="single" static="{{context}}">
         <pb-param name="header" value="letter"></pb-param>
     </pb-view>
 </section>
@@ -27,9 +27,9 @@
     <pb-view id="view1" src="document1"
         xpath="! (.//text[@xml:lang = 'la']/body | .//text/body)[1]"
         column-separator=".tei-cb" append-footnotes="append-footnotes"
-        subscribe="transcription" emit="transcription" static></pb-view>
+        subscribe="transcription" emit="transcription" static="{{context}}"></pb-view>
     <pb-view id="view2" src="document1"
         xpath="//text[@xml:lang='pl']/body" subscribe="transcription"
-        column-separator=".tei-cb" append-footnotes="append-footnotes" static></pb-view>
+        column-separator=".tei-cb" append-footnotes="append-footnotes" static="{{context}}"></pb-view>
 </main>
 {% endblock content %}

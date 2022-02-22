@@ -40,20 +40,20 @@
 
 {% block content %}
 <section class="breadcrumbs">
-    <pb-view id="title-view1" src="document1" xpath="//teiHeader" view="single" static>
+    <pb-view id="title-view1" src="document1" xpath="//teiHeader" view="single" static="{{context}}">
         <pb-param name="mode" value="title"></pb-param>
     </pb-view>
 </section>
 <main class="content-body">
     <pb-view id="view1" src="document1" xpath="//text[@type='source']" column-separator=".tei-cb"
         append-footnotes="append-footnotes" subscribe="transcription" emit="transcription"
-        wait-for="#facsimile" static></pb-view>
+        wait-for="#facsimile" static="{{context}}"></pb-view>
     <pb-facsimile id="facsimile" base-uri="https://apps.existsolutions.com/cantaloupe/iiif/2/"
         default-zoom-level="0" show-navigation-control="show-navigation-control"
         show-navigator="show-navigator"
         subscribe="transcription"></pb-facsimile>
     <pb-view id="view2" src="document1" map="cortez-translation" xpath="//text[@type='source']"
         subscribe="transcription" column-separator=".tei-cb" append-footnotes="append-footnotes"
-        static></pb-view>
+        static="{{context}}"></pb-view>
 </main>
 {% endblock %}

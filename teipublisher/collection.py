@@ -5,8 +5,8 @@ import requests
 from urllib.parse import quote_plus, urljoin
 from bs4 import BeautifulSoup
 
-def fetch(config: Config, path: str, clear: bool = False, start: int = 1):
-    output = createDirectory(Path(config.baseDir, 'collections'), path, clear)
+def fetch(config: Config, path: str, start: int = 1):
+    output = createDirectory(Path(config.baseDir, 'collections'), path, False)
     if path:
         uri = f"{config.baseUri}/api/collection/{quote_plus(path)}"
     else:
@@ -28,14 +28,14 @@ def fetch(config: Config, path: str, clear: bool = False, start: int = 1):
         documents += children['documents']
 
     if total and start + 10 < int(total):
-        documents += fetch(config, path, clear=clear, start=start + 10)
+        documents += fetch(config, path, start=start + 10)
 
     for subcol in subcols:
         if path:
             childPath = f"{path}/{subcol}"
         else:
             childPath = subcol
-        documents += fetch(config, childPath, clear=clear)
+        documents += fetch(config, childPath)
     return documents
 
 def _expand(content, collectionPath: str, config: Config, output: Path):

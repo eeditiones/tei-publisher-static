@@ -1,7 +1,9 @@
 variables:
   title: "TEI Publisher"
   remote: "http://localhost:8080/exist/apps/tei-publisher/"
-  components: 1.34.1
+  # the prefix under which pages will be available
+  context: "/tei-publisher"
+  components: 1.34.2
   # components: dev
   cdn: "https://unpkg.com/@teipublisher/pb-components"
   # cdn: "http://localhost:8000"
@@ -30,69 +32,77 @@ variables:
     "uk": "Українська"
 templates:
   view.html:
-    main:
-    title:
-      view: single
-      xpath: //teiHeader/fileDesc/titleStmt
-      user.mode: title
-    toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=true"
+    data:
+      main:
+      title:
+        view: single
+        xpath: //teiHeader/fileDesc/titleStmt
+        user.mode: title
+      toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=true"
   dta.html:
-    main:
-    title:
-      view: single
-      xpath: //teiHeader/fileDesc/titleStmt/title
-      user.header: short
-    toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=true"
+    data:
+      main:
+      title:
+        view: single
+        xpath: //teiHeader/fileDesc/titleStmt/title
+        user.header: short
+      toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=true"
   letter.html:
-    main:
-    title:
-      view: single
-      xpath: //teiHeader/fileDesc/titleStmt/title
-      user.header: short
-    places:
-      user.mode: facets
+    data:
+      main:
+      title:
+        view: single
+        xpath: //teiHeader/fileDesc/titleStmt/title
+        user.header: short
+      places:
+        user.mode: facets
   facsimile.html:
-    main:
-    title:
-      view: single
-      xpath: //teiHeader/fileDesc/titleStmt
-      user.mode: title
-    toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=true"
+    data:
+      main:
+      title:
+        view: single
+        xpath: //teiHeader/fileDesc/titleStmt
+        user.mode: title
+      toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=true"
   documentation.html:
-    main:
-    breadcrumbs:
-      user.mode: breadcrumbs
-    toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=false"
-    documentation.css: "{{remote}}templates/pages/documentation.css"
+    data:
+      main:
+      breadcrumbs:
+        user.mode: breadcrumbs
+      toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=false"
+      documentation.css: "{{remote}}templates/pages/documentation.css"
   translation.html:
-    transcription:
-      xpath: "! (.//text[@xml:lang = 'la']/body | .//text/body)[1]"
-    translation:
-      xpath: "//text[@xml:lang='pl']/body"
-    breadcrumbs:
-      view: single
-      user.header: letter
-      xpath: //teiHeader
+    data:
+      transcription:
+        xpath: "! (.//text[@xml:lang = 'la']/body | .//text/body)[1]"
+      translation:
+        xpath: "//text[@xml:lang='pl']/body"
+      breadcrumbs:
+        view: single
+        user.header: letter
+        xpath: //teiHeader
   cortez.html:
-    transcription:
-      xpath: "//text[@type='source']"
-    translation:
-      xpath: "//text[@type='source']"
-      map: cortez-translation
-    title:
-      view: single
-      xpath: //teiHeader
-      user.mode: title
+    data:
+      transcription:
+        xpath: "//text[@type='source']"
+      translation:
+        xpath: "//text[@type='source']"
+        map: cortez-translation
+      title:
+        view: single
+        xpath: //teiHeader
+        user.mode: title
   cortez-with-translation.html:
-    transcription:
-      xpath: "//text[@type='source']"
-    translation:
-      xpath: "//text[@type='source']"
-      map: cortez-translation
-    title:
-      view: single
-      xpath: //teiHeader
-      user.mode: title
+    data:
+      transcription:
+        xpath: "//text[@type='source']"
+      translation:
+        xpath: "//text[@type='source']"
+        map: cortez-translation
+      title:
+        view: single
+        xpath: //teiHeader
+        user.mode: title
 assets:
   "css/theme.css": "{{remote}}resources/css/theme.css"
   "images/tei-publisher-logo-color.svg": "{{remote}}resources/images/tei-publisher-logo-color.svg"

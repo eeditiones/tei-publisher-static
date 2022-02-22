@@ -39,7 +39,7 @@
 {% block content %}
     {% include 'toc.html' %}
     <section class="breadcrumbs">
-        <pb-view id="title-view1" src="document1" xpath="//teiHeader/fileDesc/titleStmt" view="single" static>
+        <pb-view id="title-view1" src="document1" xpath="//teiHeader/fileDesc/titleStmt" view="single" static="{{context}}">
             <pb-param name="mode" value="title"/>
         </pb-view>
     </section>
@@ -54,7 +54,7 @@
             {% endif %}
             subscribe="transcription" emit="transcription"
             column-separator=".tei-cb"
-            wait-for="toc" static></pb-view>
+            wait-for="toc" static="{{context}}"></pb-view>
         <pb-navigation direction="forward" unit="page" emit="transcription"
             subscribe="transcription" keyboard="right">
             <paper-fab icon="icons:chevron-right"/>

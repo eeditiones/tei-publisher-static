@@ -40,14 +40,14 @@
 {% block content %}
     {% include 'toc.html' %}
     <section class="breadcrumbs">
-        <pb-view id="title-view1" src="document1" xpath="//teiHeader/fileDesc/titleStmt/title" view="single" static>
+        <pb-view id="title-view1" src="document1" xpath="//teiHeader/fileDesc/titleStmt/title" view="single" static="{{context}}">
             <pb-param name="header" value="short"></pb-param>
         </pb-view>
     </section>
     <main class="content-body">
         <div id="view1">
             <pb-view src="document1" column-separator=".tei-cb" append-footnotes="append-footnotes"
-                subscribe="transcription" emit="transcription" wait-for="#facsimile" static></pb-view>
+                subscribe="transcription" emit="transcription" wait-for="#facsimile" static="{{context}}"></pb-view>
         </div>
         <pb-facsimile id="facsimile" base-uri="https://media.dwds.de/dta/images/"
             type="image"

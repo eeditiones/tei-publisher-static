@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 
 {% block scripts %}
+    {% if components == 'dev' %}
+    <script type="module" src="{{cdn}}/src/pb-leaflet-map.js"></script>
+    {% else %}
     <script type="module" src="{{cdn}}@{{components}}/dist/pb-leaflet-map.js"></script>
+    {% endif %}
 {% endblock scripts %}
 
 {% block styles %}
@@ -58,16 +62,16 @@
 {% block content %}
 <section class="breadcrumbs">
     <pb-view id="title-view1" src="document1" xpath="//teiHeader/fileDesc/titleStmt/title"
-        view="single" static>
+        view="single" static="{{context}}">
         <pb-param name="header" value="short"></pb-param>
     </pb-view>
 </section>
 <section class="content-body">
     <pb-view id="view1" src="document1" column-separator=".tei-cb" append-footnotes="append-footnotes"
-        subscribe="transcription" emit="transcription" static></pb-view>
+        subscribe="transcription" emit="transcription" static="{{context}}"></pb-view>
     <aside class="places">
         <pb-view src="document1" odd="graves" subscribe="transcription" emit="letter"
-            wait-for="pb-leaflet-map" static>
+            wait-for="pb-leaflet-map" static="{{context}}">
             <pb-param name="mode" value="facets"></pb-param>
         </pb-view>
     </aside>
