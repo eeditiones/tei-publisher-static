@@ -30,6 +30,7 @@ variables:
     "sv": "Svenska"
     "tr": "Türkçe"
     "uk": "Українська"
+collection: true
 templates:
   view.html:
     data:

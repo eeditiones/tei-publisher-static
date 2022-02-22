@@ -14,15 +14,23 @@ from functools import partial
 
 app = typer.Typer()
 
+def _loadConfig(configFile: Path, baseUri: str, outDir:Path):
+    config = Config(configFile, baseUri, outDir)
+    config.loadAssets()
+    return config
+
 @app.command()
 def pages(
     baseUri: Optional[str] = typer.Option('http://localhost:8080/exist/apps/tei-publisher/', help='TEI Publisher base URI'),
     outDir: Optional[Path] = typer.Option('static', '--out', '-o', help='Output directory'),
     configFile: Optional[Path] = typer.Option('config.yml', '--config', '-c', help="Configuration file to use")
 ):
-    config = Config(configFile, baseUri, outDir)
-    config.loadAssets()
+    """Only process the `pages` section defined in the configuration"""
+    config = _loadConfig(configFile, baseUri, outDir)
     tpgen.pages.fetch(config)
+
+def _document(config: Config, doc: str):
+    tpgen.document.fetch_document(config, doc)
 
 @app.command()
 def document(
@@ -31,21 +39,11 @@ def document(
     outDir: Optional[Path] = typer.Option('static', '--out', '-o', help='Output directory'),
     configFile: Optional[Path] = typer.Option('config.yml', '--config', '-c', help="Configuration file to use")
 ):
-    config = Config(configFile, baseUri, outDir)
-    config.loadAssets()
-    tpgen.document.fetch_document(config, doc)
+    """Fetch data for a single document path only"""
+    config = _loadConfig(configFile, baseUri, outDir)
+    _document(config, doc)
 
-@app.command()
-def collection(
-    path: Optional[str] = typer.Argument(None),
-    baseUri: Optional[str] = typer.Option('http://localhost:8080/exist/apps/tei-publisher/', help='TEI Publisher base URI'),
-    outDir: Optional[Path] = typer.Option('static', help='Output directory'),
-    recurse: bool = typer.Option(False, '--recursive', '-r', help='Fetch subcollections and documents recursively'),
-    configFile: Optional[Path] = typer.Option('config.yml', '--config', '-c', help="Configuration file to use")
-):
-    config = Config(configFile, baseUri, outDir)
-    config.loadAssets()
-
+def _collection(config: Config, path: str, recurse: bool):
     makedirs(config.baseDir, exist_ok=True)
     template = selectTemplate(['index.html'])
     expandTemplate(template, config.variables, config.baseDir)
@@ -55,11 +53,35 @@ def collection(
             tpgen.document.fetch_document(config, doc)
 
 @app.command()
+def collection(
+    path: Optional[str] = typer.Argument(None),
+    baseUri: Optional[str] = typer.Option('http://localhost:8080/exist/apps/tei-publisher/', help='TEI Publisher base URI'),
+    outDir: Optional[Path] = typer.Option('static', help='Output directory'),
+    recurse: bool = typer.Option(False, '--recursive', '-r', help='Fetch subcollections and documents recursively'),
+    configFile: Optional[Path] = typer.Option('config.yml', '--config', '-c', help="Configuration file to use")
+):
+    """Recursively fetch collections, also including linked documents if --recursive is specified."""
+    config = _loadConfig(configFile, baseUri, outDir)
+    _collection(config, path, recurse)
+
+@app.command()
 def clean(
     outDir: Optional[Path] = typer.Option('static', help='Output directory'),
 ):
+    """Clean generated content"""
     typer.echo(f"Deleting output directory {typer.style(str(outDir), typer.colors.BLUE)}")
     outDir.exists() and rmtree(outDir)
+
+@app.command()
+def build(
+    baseUri: Optional[str] = typer.Option('http://localhost:8080/exist/apps/tei-publisher/', help='TEI Publisher base URI'),
+    outDir: Optional[Path] = typer.Option('static', '--out', '-o', help='Output directory'),
+    configFile: Optional[Path] = typer.Option('config.yml', '--config', '-c', help="Configuration file to use")
+):
+    """Build entire static website as defined in the configuration"""
+    config = _loadConfig(configFile, baseUri, outDir)
+    config.collection and _collection(config, None, True)
+    tpgen.pages.fetch(config)
 
 @app.command()
 def serve(

@@ -30,6 +30,7 @@ variables:
     "sv": "Svenska"
     "tr": "Türkçe"
     "uk": "Українська"
+collection: false # do not process collections
 templates:
   guidelines.html:
     data:

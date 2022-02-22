@@ -52,8 +52,10 @@ class Config:
         self.baseUri = baseUri
         self.baseDir = baseDir
         self.context = '/'
+        self.collection = True
         with open(config, 'r') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
+            self.collection = data.get('collection') or self.collection
             self.variables = data.get('variables')
             self.baseUri = self.variables.get('remote') or baseUri
             self.baseDir = self.variables.get('baseDir') or baseDir
