@@ -1,4 +1,4 @@
-from teipublisher.util import createDirectory, expandTemplateString, selectTemplate, expandTemplate, Config
+from tpgen.util import createDirectory, expandTemplateString, selectTemplate, expandTemplate, Config
 import typer
 from pathlib import Path
 import json

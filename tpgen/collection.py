@@ -1,4 +1,4 @@
-from teipublisher.util import createDirectory, loadImages, Config
+from tpgen.util import createDirectory, loadImages, Config
 import typer
 from pathlib import Path
 import requests

@@ -1,6 +1,6 @@
-from teipublisher.util import Config, expandTemplateString
+from tpgen.util import Config, expandTemplateString
 import typer
-import teipublisher.document
+import tpgen.document
 import requests
 
 def fetch(config: Config):
@@ -10,7 +10,7 @@ def fetch(config: Config):
         pageConf = config.pages[page]
         typer.echo(f"Processing page /{typer.style(page, typer.colors.MAGENTA)}...")
         if 'doc' in pageConf:
-            teipublisher.document.fetch_document(config, pageConf['doc'], 
+            tpgen.document.fetch_document(config, pageConf['doc'], 
                 params={ 'template': pageConf['template'] }, target_path=page, clean=False
             )
         else:
@@ -24,4 +24,4 @@ def _fetchSequence(config, pageConf):
     for params in data:
         output = expandTemplateString(pageConf.get('output'), params)
         params['template'] = pageConf['template']
-        teipublisher.document.fetch(config, params, target_path=output, clean=False)
+        tpgen.document.fetch(config, params, target_path=output, clean=False)

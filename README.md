@@ -24,7 +24,7 @@ The generator is written in Python and requires Python 3. Until TEI Publisher 8 
 To recursively fetch an entire site, simply run
 
 ```sh
-python3 main.py collection --recursive
+python3 -m tpgen collection --recursive
 ```
 
 The `--recursive` option will automatically fetch the content of all documents. Skip it to just retrieve the collection listing.
@@ -32,7 +32,7 @@ The `--recursive` option will automatically fetch the content of all documents. 
 Once you generated the collections, you can also update a single document:
 
 ```sh
-python3 main.py document test/F-rom.xml
+python3 -m tpgen document test/F-rom.xml
 ```
 
 ### Launch a Simple Webserver
@@ -40,7 +40,7 @@ python3 main.py document test/F-rom.xml
 To see the result you can launch the built-in webserver of Python:
 
 ```sh
-python3 -m http.server --directory static 8001
+python3 -m tpgen serve --port 8001
 ```
 
 ## How does it work?

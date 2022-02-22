@@ -3,10 +3,14 @@ from typing import Optional
 import typer
 from pathlib import Path
 from shutil import rmtree
-import teipublisher.document
-import teipublisher.collection
-import teipublisher.pages
-from teipublisher.util import Config, expandTemplate, selectTemplate
+import tpgen.document
+import tpgen.collection
+import tpgen.pages
+from tpgen import __version__
+from tpgen.util import Config, expandTemplate, selectTemplate
+import http.server
+import socketserver
+from functools import partial
 
 app = typer.Typer()
 
@@ -18,7 +22,7 @@ def pages(
 ):
     config = Config(configFile, baseUri, outDir)
     config.loadAssets()
-    teipublisher.pages.fetch(config)
+    tpgen.pages.fetch(config)
 
 @app.command()
 def document(
@@ -29,7 +33,7 @@ def document(
 ):
     config = Config(configFile, baseUri, outDir)
     config.loadAssets()
-    teipublisher.document.fetch_document(config, doc)
+    tpgen.document.fetch_document(config, doc)
 
 @app.command()
 def collection(
@@ -45,10 +49,10 @@ def collection(
     makedirs(config.baseDir, exist_ok=True)
     template = selectTemplate(['index.html'])
     expandTemplate(template, config.variables, config.baseDir)
-    documents = teipublisher.collection.fetch(config, path)
+    documents = tpgen.collection.fetch(config, path)
     if recurse:
         for doc in documents:
-            teipublisher.document.fetch_document(config, doc)
+            tpgen.document.fetch_document(config, doc)
 
 @app.command()
 def clean(
@@ -56,6 +60,28 @@ def clean(
 ):
     typer.echo(f"Deleting output directory {typer.style(str(outDir), typer.colors.BLUE)}")
     outDir.exists() and rmtree(outDir)
+
+@app.command()
+def serve(
+    outDir: Optional[Path] = typer.Option('static', help='Output directory'),
+    port: Optional[int] = typer.Option(8080, '--port', '-p', help='Port to listen on')
+):
+    Handler = partial(http.server.SimpleHTTPRequestHandler, directory=outDir)
+
+    with socketserver.TCPServer(("", port), Handler) as httpd:
+        typer.echo(f"Listening on {httpd.server_address[0]}:{httpd.server_address[1]}")
+        httpd.serve_forever()
+
+def _version(version: bool):
+    if version:
+        typer.echo(f"V {__version__}")
+        raise typer.Exit()
+    
+@app.callback()
+def main(version: Optional[bool] = typer.Option(None, '--version', '-v', help="Show version and exit.", is_eager=True, callback=_version)) -> None:
+    """Generate a static app from an existing TEI Publisher application.
+    """
+    return
 
 if __name__ == "__main__":
     app()
