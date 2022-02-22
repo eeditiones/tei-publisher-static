@@ -24,15 +24,42 @@ The generator is written in Python and requires Python 3. Until TEI Publisher 8 
 To recursively fetch an entire site, simply run
 
 ```sh
-python3 -m tpgen collection --recursive
+python3 -m tpgen build
 ```
 
-The `--recursive` option will automatically fetch the content of all documents. Skip it to just retrieve the collection listing.
+You can also specify a different configuration with
 
-Once you generated the collections, you can also update a single document:
+```sh
+python3 -m tpgen build -c guidelines.yml
+```
+
+The `build` command includes the following tasks (if defined in the configuration):
+
+1. fetch all *assets* (if any) and store them into the configured output directory
+2. recursively scan the *root data collection* of the application. This will store the information to be displayed in the document browser, which - by default - is the main entry point into a TEI Publisher application. 
+3. traverse and download all documents found during the collection scan by following links from the collection listing
+4. fetch additional pages as defined in the *pages* section. Those are pages which do not directly correspond to a single TEI document listed in the document browser and therefore won't be processed by step 3.
+
+For testing purposes you can also call steps 2 to 4 separately using the following commands:
+
+### Fetch a collection:
+
+```sh
+python3 -m tpgen collection -r
+```
+
+Without the `-r|--recursive` option, only the collection listing for the document browser will be fetched, not the content of the documents linked from it.
+
+### Fetch/update a single document specified by relative path:
 
 ```sh
 python3 -m tpgen document test/F-rom.xml
+```
+
+### Retrieve separately defined pages only:
+
+```sh
+python3 -m tpgen pages
 ```
 
 ### Launch a Simple Webserver
@@ -45,7 +72,7 @@ python3 -m tpgen serve --port 8001
 
 ## How does it work?
 
-The generator first traverses the collection hierarchy recursively, downloading the HTML view for each page of documents to show. The retrieved content is stored into `static/collections`. It then inspects the HTML to collect the documents to be fetched.
+The main collection task traverses the collection hierarchy recursively, downloading the HTML view for each page of documents to show. The retrieved content is stored into `static/collections`. It then inspects the HTML to collect the documents to be fetched.
 
 For each document, the generator performs the following operations:
 
@@ -66,20 +93,65 @@ The existing templates in `templates` have been directly copied from TEI Publish
 
 ## Configuration
 
-All configuration is done via `config.yml`. Since a template may include more than one view on the content (i.e. multiple `pb-view` or `pb-load` components), you can define a series of different views, each using a different configuration, corresponding to the HTTP parameters to be sent with the request. For example, take the `documentation.html` template configuration:
+The different tasks can be configured via a YAML configuration file (default: `config.yml`). On top this defines various variables, which will be passed on to the templating system. You can add your own variables here and use them in your templates.
+
+### `Templates` section
+
+The `templates` section defines the data to be fetched for a given HTML template. A template may include more than one view on the content (i.e. multiple `pb-view` or `pb-load` components). You can thus define a series of different views in `data`, each using a different configuration, corresponding to the HTTP parameters to be sent with the request. For example, take the `documentation.html` template configuration:
 
 ```yaml
 documentation.html:
-    main:
-    breadcrumbs:
-      user.mode: breadcrumbs
-    toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=false"
-    documentation.css: "{{remote}}templates/pages/documentation.css"
+   data:
+      main:
+      breadcrumbs:
+         user.mode: breadcrumbs
+      toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=false"
+      documentation.css: "{{remote}}templates/pages/documentation.css"
 ```
 
 Here the main text view does not require additional parameters, which are thus left empty. However, the page includes a `pb-view` for breadcrumbs and this needs to set the parameter `mode` to `breadcrumbs`. There's also a `pb-load` for the table of contents, which only needs to be retrieved once for the document and is stored into `doc.html`. Finally, we download some additional CSS and store it as well.
 
-You can use any of the variables declared in the `variables` section of `config.yml` as well as the variables `doc`, `odd` and `view`, which are set to the corresponding values reported by the server for the current document.
+You can use any of the variables declared in the `variables` section of `config.yml` as well as the variables `doc`, `odd` and `view`, which are set to the corresponding values reported by the server for the current document. Additional per-template variables can also be defined:
+
+```yaml
+documentation.html:
+   variables:
+      title: "TEI Publisher Documentation"
+   data:
+      ...
+```
+
+### `Pages` section (optional)
+
+This section defines pages which would not be found by traversing the collection hierarchy. This may include secondary documents like about pages, project documentation etc., or other views on the data like a listing of people, places, abbreviations or a bibliography.
+
+The key of each entry in the pages section defines the output path where the fetched data will be stored. The value is an object. It *must* at least reference an HTML template and either a path to a single TEI document (`doc`) or an API endpoint returning a sequence of items to be processed (`sequence`).
+
+The generator will look up the specified template in the `templates` section and retrieve the views there. If a single document was specified (via `doc`), the template will be instantiated once for the given document. If a sequence is given (via `sequence`), the generator expects an URL, which it will contact to retrieve a sequence of items. The template is called for each item in the sequence.
+
+For example, `guidelines.yml`, which will result in a static version of the TEI Guidelines app, defines the following:
+
+```yaml
+pages:
+  "":
+    template: guidelines_start.html
+    doc: p5.xml
+  "p5.xml":
+    template: guidelines.html
+    doc: p5.xml
+  "ref":
+    template: guidelines_ref.html
+    sequence: "api/idents"
+    output: "ref/{{ident}}"
+```
+
+The first mapping states that the template `guidelines_start.html` should be used as the entry page to the website. A single TEI document (`p5.xml`) is used as input. The second path, `/p5.xml`, gets generated based on the same input document.
+
+The third entry establishes a slightly more complex mapping: instead of outputting a single page, it generates a sequence of different pages based on the information returned by the API endpoint referenced in `sequence`. This endpoint is expected to return a JSON array. Each element in the array should be an object, defining parameter mappings.
+
+For each parameter mapping, the HTML template is instantiated once with the additional parameters and any views it defines are retrieved. The resulting content is stored into the subdirectory path given by the `output` variable. As you can see above, we use the parameter `{{ident}}` as name of the final directory. This is a parameter returned by the endpoint we called to get the sequence (it will correspond to a TEI element or class name).
+
+## Workflow
 
 The general approach to take when converting a working HTML template from TEI Publisher is as follows:
 
