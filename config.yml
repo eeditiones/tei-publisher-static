@@ -30,7 +30,7 @@ variables:
     "sv": "Svenska"
     "tr": "Türkçe"
     "uk": "Українська"
-collection: true
+collection: true # default: traverse the collection hierary
 templates:
   view.html:
     data:
@@ -45,7 +45,7 @@ templates:
       main:
       title:
         view: single
-        xpath: //teiHeader/fileDesc/titleStmt/title
+        xpath: //teiHeader/fileDesc/titleStmt/title[@type="main"]
         user.header: short
       toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=true"
   letter.html:

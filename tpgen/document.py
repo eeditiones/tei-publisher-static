@@ -37,9 +37,10 @@ def fetch(config: Config, meta: dict, target_path: str = None, clean: bool = Tru
         target_path (str, optional): path to the directory to be used for output
         clean (bool, optional): clear output directory before retrieving data
     """
+    config.verbose and typer.echo(f"\nProcessing {typer.style(meta.get('doc'), typer.colors.BLUE)}...")
     meta = { **meta, **config.variables }
 
-    _checkCSS(meta, config.baseUri, config.baseDir)
+    _checkCSS(meta, config)
     if target_path != None:
         output = createDirectory(config.baseDir, target_path, clean)
     else:
@@ -63,12 +64,11 @@ def fetch(config: Config, meta: dict, target_path: str = None, clean: bool = Tru
     dataConfigs = templateConfig['data']
     page = len(mapping)
     for view in dataConfigs:
-
         cfg = dataConfigs.get(view)
         if isinstance(cfg, str):
             path = Path(output, view)
             meta['doc'] = quote_plus(meta['doc'])
-            uri = _load(config.baseUri, cfg, path, meta)
+            uri = _load(config, cfg, path, meta)
             mapping[uri] = view
         else:
             requestParams = {}
@@ -80,14 +80,15 @@ def fetch(config: Config, meta: dict, target_path: str = None, clean: bool = Tru
                 for key in cfg:
                     requestParams[key] = expandTemplateString(cfg[key], meta)
 
-            typer.echo(f"Generating view '{typer.style(view, fg=typer.colors.GREEN)}' using template {template.name} and params {requestParams}..")
+            if config.verbose:
+                typer.echo(f"Generating view '{typer.style(view, fg=typer.colors.GREEN)}' using template {template.name} and params {requestParams}")
             uri = f"{config.baseUri}/api/parts/{quote_plus(meta['doc'])}/json"
             page += 1
             next = _retrieve(config, uri, requestParams, view, page, mapping, output)
             while next:
                 page += 1
                 next = _retrieve(config, uri, requestParams, view, page, mapping, output, next)
-            typer.echo("\n")
+            config.verbose and typer.echo("\n")
     _save(output, mapping)
 
 def _retrieve(config: Config, uri: str, reqParams: dict, view: str, page: int, mapping: dict, output: Path, root: dict = None):
@@ -96,13 +97,14 @@ def _retrieve(config: Config, uri: str, reqParams: dict, view: str, page: int, m
 
     resp = requests.get(uri, params=params)
     if not resp.status_code == 200:
-        print(resp.text)
+        typer.secho(f"\n{resp.text}", color=typer.colors.RED)
         return
     data = resp.json()
     fileName = f"{view}-{page}.json"
     file = Path(output, fileName)
     
-    typer.echo(f"\rWriting page: {typer.style(str(page), fg=typer.colors.BLUE)}", nl=False)
+    if config.verbose:
+        typer.echo(f"\rWriting page: {typer.style(str(page), fg=typer.colors.BLUE)}", nl=False)
 
     content = _expandLinks(config, data['content'])
 
@@ -124,10 +126,11 @@ def _retrieve(config: Config, uri: str, reqParams: dict, view: str, page: int, m
         return { 'root': data.get('next') }
     return None
 
-def _load(baseUri: str, uriTemplate: str, output: Path, meta: dict):
+def _load(config: Config, uriTemplate: str, output: Path, meta: dict):
     uri = expandTemplateString(uriTemplate, meta)
-    typer.echo(f"Downloading {typer.style(uri, fg=typer.colors.GREEN)} to {output}")
-    url = urljoin(baseUri, uri)
+    if config.verbose:
+        typer.echo(f"Downloading {typer.style(uri, fg=typer.colors.GREEN)} to {output}")
+    url = urljoin(config.baseUri, uri)
     resp = requests.get(url)
     with open(output, 'w', encoding="UTF-8") as f:
         resp.encoding = "UTF-8"
@@ -144,23 +147,24 @@ def _loadMap(output: Path):
 def _loadMeta(baseUri, doc) -> dict:
     resp = requests.get(f"{baseUri}/api/document/{quote_plus(doc)}/meta")
     if resp.status_code != 200:
-        typer.echo(typer.style(f"Skipping document: {doc}!", fg=typer.colors.RED))
+        typer.echo(typer.style(f"\nSkipping document: {doc}!", fg=typer.colors.RED))
         return None
     return resp.json()
 
-def _checkCSS(meta: dict, baseUri: str, baseDir: Path):
+def _checkCSS(meta: dict, config: Config):
     if meta.get('odd'):
         file = f"{meta['odd'][:-4]}.css"
-        path = Path(baseDir, 'css', file)
+        path = Path(config.baseDir, 'css', file)
         if not path.exists():
-            resp = requests.get(f"{baseUri}/transform/{file}")
+            resp = requests.get(f"{config.baseUri}/transform/{file}")
             if resp.status_code == 200:
-                typer.echo(f"Copying {file} to {path}.")
-                makedirs(Path(baseDir, 'css'), exist_ok=True)
+                if config.verbose:
+                    typer.echo(f"Copying {file} to {path}.")
+                makedirs(Path(config.baseDir, 'css'), exist_ok=True)
                 with open(path, 'w') as f:
                     f.write(resp.text)
             else:
-                typer.echo(typer.style(f"Stylesheet {file} not found", fg=typer.colors.CYAN))
+                typer.echo(typer.style(f"Stylesheet {file} not found", fg=typer.colors.MAGENTA))
 
 def _expandIds(content: BeautifulSoup, mapping: dict, params: dict, fileName: str):
     """Parse the content for elements having an id and add mappings for those

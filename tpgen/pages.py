@@ -14,14 +14,15 @@ def fetch(config: Config):
                 params={ 'template': pageConf['template'] }, target_path=page, clean=False
             )
         else:
-            _fetchSequence(config, pageConf)
+            _fetchSequence(config, page, pageConf)
 
-def _fetchSequence(config, pageConf):
+def _fetchSequence(config, page, pageConf):
     sequence = pageConf.get('sequence')
     resp = requests.get(f"{config.baseUri}{sequence}")
 
     data = resp.json()
-    for params in data:
-        output = expandTemplateString(pageConf.get('output'), params)
-        params['template'] = pageConf['template']
-        tpgen.document.fetch(config, params, target_path=output, clean=False)
+    with typer.progressbar(data, label=f"Processing page {page}") as progress:
+        for params in progress:
+            output = expandTemplateString(pageConf.get('output'), params)
+            params['template'] = pageConf['template']
+            tpgen.document.fetch(config, params, target_path=output, clean=False)

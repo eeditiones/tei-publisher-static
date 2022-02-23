@@ -14,8 +14,8 @@ from functools import partial
 
 app = typer.Typer()
 
-def _loadConfig(configFile: Path, baseUri: str, outDir:Path):
-    config = Config(configFile, baseUri, outDir)
+def _loadConfig(configFile: Path, baseUri: str, outDir: Path, verbose: bool):
+    config = Config(configFile, baseUri, outDir, verbose)
     config.loadAssets()
     return config
 
@@ -23,10 +23,11 @@ def _loadConfig(configFile: Path, baseUri: str, outDir:Path):
 def pages(
     baseUri: Optional[str] = typer.Option('http://localhost:8080/exist/apps/tei-publisher/', help='TEI Publisher base URI'),
     outDir: Optional[Path] = typer.Option('static', '--out', '-o', help='Output directory'),
-    configFile: Optional[Path] = typer.Option('config.yml', '--config', '-c', help="Configuration file to use")
+    configFile: Optional[Path] = typer.Option('config.yml', '--config', '-c', help="Configuration file to use"),
+    verbose: Optional[bool] = typer.Option(False, '--verbose', '-v', help='Be more verbose')
 ):
     """Only process the `pages` section defined in the configuration"""
-    config = _loadConfig(configFile, baseUri, outDir)
+    config = _loadConfig(configFile, baseUri, outDir, verbose)
     tpgen.pages.fetch(config)
 
 def _document(config: Config, doc: str):
@@ -40,7 +41,7 @@ def document(
     configFile: Optional[Path] = typer.Option('config.yml', '--config', '-c', help="Configuration file to use")
 ):
     """Fetch data for a single document path only"""
-    config = _loadConfig(configFile, baseUri, outDir)
+    config = _loadConfig(configFile, baseUri, outDir, True)
     _document(config, doc)
 
 def _collection(config: Config, path: str, recurse: bool):
@@ -49,8 +50,9 @@ def _collection(config: Config, path: str, recurse: bool):
     expandTemplate(template, config.variables, config.baseDir)
     documents = tpgen.collection.fetch(config, path)
     if recurse:
-        for doc in documents:
-            tpgen.document.fetch_document(config, doc)
+        with typer.progressbar(documents, label='Processing documents', item_show_func=lambda x: x) as progress:
+            for doc in progress:
+                tpgen.document.fetch_document(config, doc)
 
 @app.command()
 def collection(
@@ -58,10 +60,11 @@ def collection(
     baseUri: Optional[str] = typer.Option('http://localhost:8080/exist/apps/tei-publisher/', help='TEI Publisher base URI'),
     outDir: Optional[Path] = typer.Option('static', help='Output directory'),
     recurse: bool = typer.Option(False, '--recursive', '-r', help='Fetch subcollections and documents recursively'),
-    configFile: Optional[Path] = typer.Option('config.yml', '--config', '-c', help="Configuration file to use")
+    configFile: Optional[Path] = typer.Option('config.yml', '--config', '-c', help="Configuration file to use"),
+    verbose: Optional[bool] = typer.Option(False, '--verbose', '-v', help='Be more verbose')
 ):
     """Recursively fetch collections, also including linked documents if --recursive is specified."""
-    config = _loadConfig(configFile, baseUri, outDir)
+    config = _loadConfig(configFile, baseUri, outDir, verbose)
     _collection(config, path, recurse)
 
 @app.command()
@@ -76,19 +79,21 @@ def clean(
 def build(
     baseUri: Optional[str] = typer.Option('http://localhost:8080/exist/apps/tei-publisher/', help='TEI Publisher base URI'),
     outDir: Optional[Path] = typer.Option('static', '--out', '-o', help='Output directory'),
-    configFile: Optional[Path] = typer.Option('config.yml', '--config', '-c', help="Configuration file to use")
+    configFile: Optional[Path] = typer.Option('config.yml', '--config', '-c', help="Configuration file to use"),
+    verbose: Optional[bool] = typer.Option(False, '--verbose', '-v', help='Be more verbose')
 ):
     """Build entire static website as defined in the configuration"""
-    config = _loadConfig(configFile, baseUri, outDir)
+    config = _loadConfig(configFile, baseUri, outDir, verbose)
     config.collection and _collection(config, None, True)
     tpgen.pages.fetch(config)
 
 @app.command()
 def serve(
     outDir: Optional[Path] = typer.Option('static', help='Output directory'),
-    port: Optional[int] = typer.Option(8080, '--port', '-p', help='Port to listen on')
+    port: Optional[int] = typer.Option(8001, '--port', '-p', help='Port to listen on')
 ):
-    Handler = partial(http.server.SimpleHTTPRequestHandler, directory=outDir)
+    directory = outDir.resolve()
+    Handler = partial(http.server.SimpleHTTPRequestHandler, directory=str(directory))
 
     with socketserver.TCPServer(("", port), Handler) as httpd:
         typer.echo(f"Listening on {httpd.server_address[0]}:{httpd.server_address[1]}")

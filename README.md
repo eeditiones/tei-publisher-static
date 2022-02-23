@@ -1,6 +1,6 @@
 # Static Site Generator for TEI Publisher
 
-**Work in Progress** - status: functional, but not complete.
+**Work in Progress** - status: functional, but limited testing
 
 This repository contains a static site generator for TEI Publisher. It can basically create a static version of a website by pre-generating all content. It does so by traversing the site's content via TEI Publishers public API, transforming all documents via the associated ODDs and storing the output into the file system. The result is a website without dynamic content: neither eXist-db nor TEI Publisher are required.
 
@@ -93,9 +93,20 @@ The existing templates in `templates` have been directly copied from TEI Publish
 
 ## Configuration
 
-The different tasks can be configured via a YAML configuration file (default: `config.yml`). On top this defines various variables, which will be passed on to the templating system. You can add your own variables here and use them in your templates.
+The different tasks can be configured via a YAML configuration file (default: `config.yml`). 
 
-### `Templates` section
+## `variables` section
+
+On top this defines various variables, which will be passed on to the templating system. You can add your own variables here and use them in your templates.
+
+Important variables are:
+
+Variable | Description
+---------|----------
+ remote | Base URL of the TEI Publisher instance to fetch data from
+ context | the prefix path under which the static content will be available
+
+### `templates` section
 
 The `templates` section defines the data to be fetched for a given HTML template. A template may include more than one view on the content (i.e. multiple `pb-view` or `pb-load` components). You can thus define a series of different views in `data`, each using a different configuration, corresponding to the HTTP parameters to be sent with the request. For example, take the `documentation.html` template configuration:
 

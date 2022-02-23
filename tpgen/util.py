@@ -48,14 +48,16 @@ def expandTemplate(template: Template, meta: dict, output: Path):
 
 class Config:
     
-    def __init__(self, config: Path, baseUri: str, baseDir: Path) -> None:
+    def __init__(self, config: Path, baseUri: str, baseDir: Path, verbose: bool = False) -> None:
         self.baseUri = baseUri
         self.baseDir = baseDir
         self.context = '/'
         self.collection = True
+        self.verbose = verbose
         with open(config, 'r') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
-            self.collection = data.get('collection') or self.collection
+            if data.get('collection') == False:
+                self.collection = False
             self.variables = data.get('variables')
             self.baseUri = self.variables.get('remote') or baseUri
             self.baseDir = self.variables.get('baseDir') or baseDir
@@ -68,6 +70,8 @@ class Config:
                 stripped = self.variables.get('context').strip('/')
                 self.context = f"/{stripped}/"
                 self.baseDir = Path(self.baseDir, stripped)
+            if self.variables.get('title'):
+                echo(f"Fetching: {style(self.variables['title'], colors.GREEN)}")
 
     def loadAssets(self):
         if self.assets:
@@ -87,7 +91,6 @@ def createDirectory(baseDir: str, path: str, clear: bool = False):
     if clear and outDir.exists():
         echo(f"Removing directory {str(outDir)}")
         rmtree(outDir, ignore_errors=True)
-    echo(f"Creating output directory {style(str(outDir), fg=colors.BLUE)}")
     makedirs(outDir, exist_ok=True)
     return outDir
 
