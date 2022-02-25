@@ -1,11 +1,35 @@
 {% extends 'base.html' %}
 {% block styles %}
 <link rel="stylesheet" href="{{context}}/css/guidelines.css">
+<style>
+.content-body {
+    display: flex;
+    justify-content: center;
+    --pb-view-max-width: 1200px;
+    --pb-code-highlight-white-space: pre-wrap;
+}
+
+#tocToggle {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    body {
+        --pb-view-max-width: auto;
+        --pb-content-font-size: 13px;
+    }
+}
+</style>
 {% endblock styles %}
+{% block toolbar_start %}
+<pb-autocomplete placeholder="Name of element or class" emit="ident" substring
+    source="autocomplete.html" preload icon="icons:search"></pb-autocomplete>
+{% endblock toolbar_start %}
 {% block content %}
+
 <main class="content-body">
     <pb-view id="reference" src="document1" load-css="../../css/tei.css"
-        xpath="//(elementSpec | classSpec | macroSpec | attSpec | dataSpec)[@ident='{{ident}}']"
+        xpath="//(elementSpec|classSpec|macroSpec|attSpec|dataSpec)[@ident='{{ident}}']"
         view="single" subscribe="transcription" fix-links="fixLinks" static="{{context}}">
         <pb-param name="lng" value="en"/>
         <pb-param name="mode" value="ref"/>

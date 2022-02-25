@@ -30,7 +30,7 @@
         {% block scripts %}{% endblock scripts %}
     </head>
     <body>
-        <pb-page api-version="1.0.0" unresolved="unresolved">
+        <pb-page api-version="1.0.0" unresolved="unresolved" app-root="{{context}}">
             {% block document %}
             <pb-document id="document1" path="{{doc}}" view="{{view}}" odd="{{odd}}"></pb-document>
             {% endblock document %}

@@ -42,6 +42,9 @@ templates:
         user.mode: title
       breadcrumbs:
         user.mode: breadcrumbs
+      guide:
+        user.mode: guide
+        user.lng: en
       toc.html: "api/document/{{doc}}/contents?target=transcription&icons=true"
   guidelines_start.html:
     variables:
@@ -62,17 +65,19 @@ templates:
         view: single
         xpath: //back
         user.mode: toc
+      autocomplete.html: "api/ident/autocomplete"
   guidelines_ref.html:
     variables:
       odd: tei.odd
       view: single
     data:
       main:
-        xpath: "//(elementSpec | classSpec | macroSpec | attSpec | dataSpec)[@ident='{{ident}}']"
+        xpath: //(elementSpec|classSpec|macroSpec|attSpec|dataSpec)[@ident='{{ident}}']
         user.lng: en
         user.mode: ref
         odd: tei.odd
         view: single
+      autocomplete.html: "api/ident/autocomplete"
 pages:
   "":
     template: guidelines_start.html
@@ -89,6 +94,7 @@ assets:
   "ref/tei.css": "{{remote}}transform/tei.css"
   "images/tei.png": "{{remote}}resources/images/tei.png"
   "css/guidelines.css": "{{remote}}resources/css/guidelines.css"
+  "scripts/app.js": "{{remote}}resources/scripts/app.js"
   "images/tei-publisher-logo-contrast-color.svg": "{{remote}}resources/images/tei-publisher-logo-contrast-color.svg"
   "images/favicon-16.png": "{{remote}}resources/images/favicon-16.png"
   "images/favicon-24.png": "{{remote}}resources/images/favicon-24.png"
