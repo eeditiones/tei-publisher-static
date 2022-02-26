@@ -1,4 +1,6 @@
-from tpgen.util import Config, expandTemplateString
+from soupsieve import select
+from tpgen.util import Config, createDirectory, expandTemplateString, expandTemplate, selectTemplate
+from pathlib import Path
 import typer
 import tpgen.document
 import requests
@@ -13,8 +15,12 @@ def fetch(config: Config):
             tpgen.document.fetch_document(config, pageConf['doc'], 
                 params={ 'template': pageConf['template'] }, target_path=page, clean=False
             )
-        else:
+        elif 'sequence' in pageConf:
             _fetchSequence(config, page, pageConf)
+        else:
+            outDir = createDirectory(config.baseDir, page, True)
+            template = selectTemplate((pageConf['template'], 'view.html'))
+            expandTemplate(template, config.variables, outDir)
 
 def _fetchSequence(config, page, pageConf):
     sequence = pageConf.get('sequence')

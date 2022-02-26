@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends 'guidelines_base.html' %}
+
 {% block styles %}
-<link rel="stylesheet" href="{{context}}/css/guidelines.css">
 <style>
 .content-body {
     display: flex;
@@ -21,12 +21,13 @@
 }
 </style>
 {% endblock styles %}
+
 {% block toolbar_start %}
 <pb-autocomplete placeholder="Name of element or class" emit="ident" substring
     source="autocomplete.html" preload icon="icons:search"></pb-autocomplete>
 {% endblock toolbar_start %}
-{% block content %}
 
+{% block content %}
 <main class="content-body">
     <pb-view id="reference" src="document1" load-css="../../css/tei.css"
         xpath="//(elementSpec|classSpec|macroSpec|attSpec|dataSpec)[@ident='{{ident}}']"

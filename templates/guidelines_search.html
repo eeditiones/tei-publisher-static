@@ -1,0 +1,39 @@
+{% extends 'guidelines_base.html' %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.7.2/dist/flexsearch.bundle.js"></script>
+<script src="{{context}}/scripts/search.js"></script>
+{% endblock scripts %}
+
+{% block styles %}
+<style>
+    .content-body {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .breadcrumb:not(:first-child)::before {
+        content: '>';
+        padding-right: .5em;
+        padding-left: .5em;
+    }
+
+    #query {
+        display: none;
+    }
+
+    #results a, #results a:link {
+        text-decoration: none;
+        color: inherit;
+    }
+</style>
+{% endblock styles %}
+
+{% block content %}
+<main class="content-body">
+    <header>
+        <pb-search id="search-input" label="Search" disable-autocomplete></pb-search>
+    </header>
+    <div id="results"></div>
+</main>
+{% endblock content %}

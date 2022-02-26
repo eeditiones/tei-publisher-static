@@ -92,6 +92,7 @@ def serve(
     outDir: Optional[Path] = typer.Option('static', help='Output directory'),
     port: Optional[int] = typer.Option(8001, '--port', '-p', help='Port to listen on')
 ):
+    """Start simple python webserver"""
     directory = outDir.resolve()
     Handler = partial(http.server.SimpleHTTPRequestHandler, directory=str(directory))
 

@@ -5,7 +5,7 @@ import json
 import requests
 from os import makedirs
 from urllib.parse import quote_plus, urljoin, urlparse
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
 def fetch_document(config: Config, doc: str, params: dict = {}, target_path: str = None, clean: bool = True):
     """Recursively fetch a document.
@@ -45,6 +45,7 @@ def fetch(config: Config, meta: dict, target_path: str = None, clean: bool = Tru
         output = createDirectory(config.baseDir, target_path, clean)
     else:
         output = createDirectory(config.baseDir, meta['doc'], clean)
+    
     mapping = _loadMap(output)
     
     template = selectTemplate((meta.get('template'), 'view.html'))
@@ -78,20 +79,22 @@ def fetch(config: Config, meta: dict, target_path: str = None, clean: bool = Tru
                 requestParams['view'] = meta.get('view')
             if cfg != None:
                 for key in cfg:
-                    requestParams[key] = expandTemplateString(cfg[key], meta)
+                    if key != 'index':
+                        requestParams[key] = expandTemplateString(cfg[key], meta) if isinstance(cfg[key], str) else cfg[key]
 
             if config.verbose:
                 typer.echo(f"Generating view '{typer.style(view, fg=typer.colors.GREEN)}' using template {template.name} and params {requestParams}")
             uri = f"{config.baseUri}/api/parts/{quote_plus(meta['doc'])}/json"
             page += 1
-            next = _retrieve(config, uri, requestParams, view, page, mapping, output)
+            next = _retrieve(config, uri, requestParams, view, page, mapping, output, cfg.get('index'))
             while next:
                 page += 1
-                next = _retrieve(config, uri, requestParams, view, page, mapping, output, next)
+                next = _retrieve(config, uri, requestParams, view, page, mapping, output, cfg.get('index'), next)
             config.verbose and typer.echo("\n")
     _save(output, mapping)
 
-def _retrieve(config: Config, uri: str, reqParams: dict, view: str, page: int, mapping: dict, output: Path, root: dict = None):
+def _retrieve(config: Config, uri: str, reqParams: dict, view: str, page: int, mapping: dict, 
+    output: Path, index: str = None, root: dict = None):
     params = dict(reqParams)
     root and params.update(root)
 
@@ -100,13 +103,16 @@ def _retrieve(config: Config, uri: str, reqParams: dict, view: str, page: int, m
         typer.secho(f"\n{resp.text}", color=typer.colors.RED)
         return
     data = resp.json()
-    fileName = f"{view}-{page}.json"
+    fileId = f"{view}-{page}"
+    fileName = f"{fileId}.json"
     file = Path(output, fileName)
     
     if config.verbose:
         typer.echo(f"\rWriting page: {typer.style(str(page), fg=typer.colors.BLUE)}", nl=False)
 
     content = _expandLinks(config, data['content'])
+    
+    index and _index(config, index, content, data, output)
 
     with (open(file, 'w')) as f:
         data['content'] = str(content)
@@ -125,6 +131,33 @@ def _retrieve(config: Config, uri: str, reqParams: dict, view: str, page: int, m
     elif data.get('next'):
         return { 'root': data.get('next') }
     return None
+
+def _index(config: Config, selector: str, content: BeautifulSoup, info: dict, path: Path):
+    """Create index entries for the given content in a jsonl file, which will be
+    loaded into the in-browser search engine."""
+    relPath = path.relative_to(config.baseDir)
+    if info.get('id'):
+        params = f"?id={info['id']}"
+    else:
+        params = f"?root={info['root']}"
+    blocks = content.select(selector);
+    with open(Path(config.baseDir, 'index.jsonl'), 'a', encoding="UTF-8") as jsonl:
+        for block in blocks:
+            text = block.get_text()
+            if text != "":
+                doc = {
+                    'path': f"{config.context}/{str(relPath)}{params}",
+                    'context': _getContext(block),
+                    'content': block.get_text(),
+                    'title': block.name in ('h1', 'h2', 'h3', 'h4', 'h5', 'h6')
+                }
+                json.dump(doc, jsonl, ensure_ascii=False)
+                jsonl.write('\n')
+
+def _getContext(block: Tag):
+    div = block.find_parent(('div', 'section'))
+    if div and div.attrs.get('data-tei'):
+        return div['data-tei']
 
 def _load(config: Config, uriTemplate: str, output: Path, meta: dict):
     uri = expandTemplateString(uriTemplate, meta)

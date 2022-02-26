@@ -1,3 +1,4 @@
+{# Base template for TEI Guidelines: https://github.com/eeditiones/tei-guidelines #}
 <!DOCTYPE html>
 <html>
     <head>
@@ -12,13 +13,10 @@
         <title>{{title}}</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@300&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="{{context}}/css/theme.css">
-        <style>
-            body {
-                --pb-serif-font-family: "Cardo", Georgia, "Times New Roman", serif;
-            }
-        </style>
+        <link rel="stylesheet" href="{{context}}/css/guidelines.css">
+
         {% block styles %}{% endblock %}
         <script defer src="https://unpkg.com/@webcomponents/webcomponentsjs@2.4.3/webcomponents-loader.js"></script>
         <script defer src="https://unpkg.com/web-animations-js@2.3.2/web-animations-next-lite.min.js"></script>
@@ -27,6 +25,7 @@
         {% else %}
         <script type="module" src="{{cdn}}@{{components}}/dist/pb-components-bundle.js"></script>
         {% endif %}
+        <script src="{{context}}/scripts/app.js"></script>
         {% block scripts %}{% endblock scripts %}
     </head>
     <body>
@@ -40,30 +39,13 @@
                         <a href="{{context}}/index.html" class="logo"></a>
                         <pb-media-query query="min-width: 1024px">
                             <a href="{{context}}/index.html">Start</a>
-                            <paper-menu-button>
-                                <a href="#" slot="dropdown-trigger">
-                                    <pb-i18n key="menu.documentation">Documentation</pb-i18n>
-                                </a>
-                                <paper-listbox slot="dropdown-content">
-                                    <paper-item>
-                                        <a href="{{context}}/doc/documentation.xml">
-                                            <pb-i18n key="menu.documentation">Documentation</pb-i18n>
-                                        </a>
-                                    </paper-item>
-                                    <paper-item>
-                                        <a href="https://faq.teipublisher.com/">FAQ</a>
-                                    </paper-item>
-                                    <paper-item>
-                                        <a href="https://unpkg.com/@teipublisher/pb-components@latest/dist/api.html" target="_blank">Webcomponents API</a>
-                                    </paper-item>
-                                    <paper-item>
-                                        <a href="{{context}}/api.html" target="_blank">TEI Publisher API</a>
-                                    </paper-item>
-                                </paper-listbox>
-                            </paper-menu-button>
+                            <a href="https://tei-c.org/guidelines/p5/using-the-tei-github-repository/">Getting and Using the TEI Sources</a>
+                            <a href="https://github.com/TEIC/TEI" target="_blank" title="TEI GitHub Repository"><img src="{{context}}/images/GitHub-Mark-Light-64px.png" class="github"/></a>
+                            <a href="https://github.com/TEIC/TEI/issues" target="_blank">Report an issue</a>
                         </pb-media-query>
                         <pb-media-query query="min-width: 1024px">
                             {% block menubar %}{% endblock menubar %}
+                            <pb-search id="query" label="Search" action="{{context}}/search" disable-autocomplete redirect></pb-search>
                             <!-- language selector -->
                             <pb-lang name="lang">
                                 {% for key, value in languages | dictsort %}
@@ -74,9 +56,6 @@
                     </app-toolbar>
                     <app-toolbar class="toolbar" sticky="sticky">
                         <paper-icon-button id="tocToggle" class="toc-toggle" icon="icons:view-list"></paper-icon-button>
-                        <a id="toolbar-parent" href="{{context}}?collection={{collection}}">
-                            <paper-icon-button icon="icons:folder-open"></paper-icon-button>
-                        </a>
                         {% block toolbar_start %}{% endblock %}
                         <pb-zoom emit="transcription" direction="in" icon="icons:zoom-in"></pb-zoom>
                         <pb-zoom emit="transcription" direction="out" icon="icons:zoom-out"></pb-zoom>
