@@ -3,7 +3,7 @@ variables:
   remote: "http://localhost:8080/exist/apps/tei-publisher/"
   # the prefix under which pages will be available
   context: "/tei-publisher"
-  components: 1.34.2
+  components: 1.35.1
   # components: dev
   cdn: "https://unpkg.com/@teipublisher/pb-components"
   # cdn: "http://localhost:8000"
@@ -45,7 +45,7 @@ templates:
       main:
       title:
         view: single
-        xpath: //teiHeader/fileDesc/titleStmt/title[@type="main"]
+        xpath: //teiHeader/fileDesc/titleStmt/title[@type='main']
         user.header: short
       toc.html: "{{remote}}api/document/{{doc}}/contents?target=transcription&icons=true"
   letter.html:

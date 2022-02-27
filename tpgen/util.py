@@ -1,6 +1,5 @@
-from codecs import ignore_errors
 from pathlib import Path
-from shutil import rmtree, copyfile
+from shutil import rmtree
 from os import makedirs
 from typing import List
 from typer import echo, secho, style, colors
@@ -40,6 +39,17 @@ def selectTemplate(templates: List) -> Template:
     return jinija.select_template(templates)
 
 def expandTemplate(template: Template, meta: dict, output: Path):
+    """Expand the given template using parameters passed `meta` and
+    write the resulting html to `index.html` below `output`.
+
+    Args:
+        template (Template): the Jinija template to use
+        meta (dict): dictionary with parameters
+        output (Path): output directory
+
+    Returns:
+        str: name of the template
+    """
     params = dict(meta)
     if meta.get('odd'):
         params['odd'] = meta['odd'][:-4]
@@ -49,7 +59,9 @@ def expandTemplate(template: Template, meta: dict, output: Path):
     return template.name
 
 class Config:
-    
+    """Central configuration class initialized from YAML config file
+    """
+
     def __init__(self, config: Path, baseUri: str, baseDir: Path, verbose: bool = False) -> None:
         self.baseUri = baseUri
         self.baseDir = baseDir

@@ -77,19 +77,20 @@ def fetch(config: Config, meta: dict, target_path: str = None, clean: bool = Tru
                 requestParams['odd'] = meta.get('odd')
             if meta.get('view'): 
                 requestParams['view'] = meta.get('view')
+            index = None
             if cfg != None:
                 for key in cfg:
                     if key != 'index':
                         requestParams[key] = expandTemplateString(cfg[key], meta) if isinstance(cfg[key], str) else cfg[key]
-
+                index = cfg.get('index')
             if config.verbose:
                 typer.echo(f"Generating view '{typer.style(view, fg=typer.colors.GREEN)}' using template {template.name} and params {requestParams}")
             uri = f"{config.baseUri}/api/parts/{quote_plus(meta['doc'])}/json"
             page += 1
-            next = _retrieve(config, uri, requestParams, view, page, mapping, output, cfg.get('index'))
+            next = _retrieve(config, uri, requestParams, view, page, mapping, output, index)
             while next:
                 page += 1
-                next = _retrieve(config, uri, requestParams, view, page, mapping, output, cfg.get('index'), next)
+                next = _retrieve(config, uri, requestParams, view, page, mapping, output, index, next)
             config.verbose and typer.echo("\n")
     _save(output, mapping)
 

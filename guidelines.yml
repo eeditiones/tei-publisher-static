@@ -71,6 +71,7 @@ templates:
         xpath: //back
         user.mode: toc
       autocomplete.html: "api/ident/autocomplete"
+      toc.html: "api/document/{{doc}}/contents?target=transcription&icons=true"
   guidelines_ref.html:
     variables:
       odd: tei.odd

@@ -17,15 +17,16 @@
         column-gap: 20px;
     }
 
-    .content-body header {
-        grid-column: 2;
-        --pb-view-max-width: auto;
-    }
-
-    .content-body section {
+    .content-body section, .content-body header {
         display: block;
         margin: 0 auto;
         grid-column: 2;
+    }
+
+    @media (min-width: 769px) {
+        .content-body header {
+            width: 100%;
+        }
     }
 
     .content-body aside {

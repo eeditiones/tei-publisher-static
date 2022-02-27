@@ -40,7 +40,7 @@
 {% block content %}
     {% include 'toc.html' %}
     <section class="breadcrumbs">
-        <pb-view id="title-view1" src="document1" xpath="//teiHeader/fileDesc/titleStmt/title" view="single" static="{{context}}">
+        <pb-view id="title-view1" src="document1" xpath="//teiHeader/fileDesc/titleStmt/title[@type='main']" view="single" static="{{context}}">
             <pb-param name="header" value="short"></pb-param>
         </pb-view>
     </section>

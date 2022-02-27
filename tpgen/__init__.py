@@ -1,2 +1,2 @@
-__app_name__ = "teipublisher"
+__app_name__ = "tpgen"
 __version__ = "0.1.0"

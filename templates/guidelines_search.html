@@ -12,6 +12,12 @@
         margin: 0 auto;
     }
 
+    @media (max-width: 768px) {
+        .content-body {
+            margin: 0 10px;
+        }
+    }
+    
     .breadcrumb:not(:first-child)::before {
         content: '>';
         padding-right: .5em;
@@ -25,6 +31,10 @@
     #results a, #results a:link {
         text-decoration: none;
         color: inherit;
+    }
+
+    .toc-toggle {
+        display: none;
     }
 </style>
 {% endblock styles %}
