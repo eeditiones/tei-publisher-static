@@ -146,21 +146,30 @@ def _index(config: Config, selector: str, content: BeautifulSoup, info: dict, pa
         for block in blocks:
             text = block.get_text()
             if text != "":
+                context = block.find_parent(('div', 'section'), attrs={ 'data-tei': True })
+                divWithId = block.find_parent(('div', 'section'), attrs={ 'id': True })
+                id = '' if divWithId == None else divWithId['id']
                 doc = {
-                    'path': f"{config.context}/{str(relPath)}{params}",
-                    'context': _getContext(block),
+                    'path': f"{config.context}{str(relPath)}{params}#{id}",
+                    'context': context['data-tei'],
                     'content': block.get_text(),
                     'title': block.name in ('h1', 'h2', 'h3', 'h4', 'h5', 'h6')
                 }
                 json.dump(doc, jsonl, ensure_ascii=False)
                 jsonl.write('\n')
 
-def _getContext(block: Tag):
-    div = block.find_parent(('div', 'section'))
-    if div and div.attrs.get('data-tei'):
-        return div['data-tei']
-
 def _load(config: Config, uriTemplate: str, output: Path, meta: dict):
+    """Download a single resource from the given expanded URI and store it
+
+    Args:
+        config (Config): the global configuration
+        uriTemplate (str): URI to fetch from - will be expanded via templating
+        output (Path): the output file to save into
+        meta (dict): parameters to be passed to the URI template
+
+    Returns:
+        _type_: _description_
+    """
     uri = expandTemplateString(uriTemplate, meta)
     if config.verbose:
         typer.echo(f"Downloading {typer.style(uri, fg=typer.colors.GREEN)} to {output}")
@@ -172,20 +181,45 @@ def _load(config: Config, uriTemplate: str, output: Path, meta: dict):
     return uri
 
 def _loadMap(output: Path):
+    """Load an existing `index.json` map or create an empty map
+
+    Args:
+        output (Path): directory to check
+
+    Returns:
+        dict: contents of the existing map or an empty dict
+    """
     indexPath = Path(output, 'index.json')
     if indexPath.exists():
         with open(indexPath, 'r') as f:
             return json.load(f)
     return {}
 
-def _loadMeta(baseUri, doc) -> dict:
+def _loadMeta(baseUri: str, doc: str) -> dict:
+    """Contact TEI Publisher API to retrieve basic metadata about
+    the specified document. This includes: used ODD, preferred view and template.
+
+    Args:
+        baseUri (str): TEI Publisher base URI
+        doc (str): relative document path
+
+    Returns:
+        dict: metadata returned by endpoint
+    """
     resp = requests.get(f"{baseUri}/api/document/{quote_plus(doc)}/meta")
     if resp.status_code != 200:
         typer.echo(typer.style(f"\nSkipping document: {doc}!", fg=typer.colors.RED))
         return None
     return resp.json()
 
-def _checkCSS(meta: dict, config: Config):
+def _checkCSS(meta: dict, config: Config) -> None:
+    """Check if the CSS styles for the used ODD were already downloaded
+    and fetch them if not.
+
+    Args:
+        meta (dict): document metadata referencing the ODD
+        config (Config): global configuration object
+    """
     if meta.get('odd'):
         file = f"{meta['odd'][:-4]}.css"
         path = Path(config.baseDir, 'css', file)
@@ -240,13 +274,28 @@ def _expandLinks(config: Config, content: str) -> BeautifulSoup:
                 link['href'] = absolute
     return soup
 
-def _getKey(params: dict):
+def _getKey(params: dict) -> str:
+    """Generate a key from the passed in parameters to be used for
+    the URL mapping. Parameters are sorted alphabetically.
+
+    Args:
+        params (dict): the parameters
+
+    Returns:
+        str: resulting key
+    """
     encParams = []
     for key in sorted(params):
         encParams.append(f"{key}={params[key]}")
     return "&".join(encParams)    
 
 def _save(output, mapping):
+    """Save the URI mapping for the document into `index.json`
+
+    Args:
+        output (Path): output directory
+        mapping (dict): URI mapping to save
+    """
     mapFile = Path(output, 'index.json')
     with open(mapFile, 'w') as f:
         json.dump(mapping, f, ensure_ascii=False, indent=4)

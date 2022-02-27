@@ -3,7 +3,7 @@ variables:
   remote: "http://localhost:8080/exist/apps/tei-publisher/"
   # the prefix under which pages will be available
   context: "/tei-publisher"
-  components: 1.35.1
+  components: 1.35.2
   # components: dev
   cdn: "https://unpkg.com/@teipublisher/pb-components"
   # cdn: "http://localhost:8000"

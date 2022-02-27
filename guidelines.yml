@@ -4,7 +4,7 @@ variables:
   title: "TEI P5: Guidelines for Electronic Text Encoding and Interchange"
   remote: "http://localhost:8080/exist/apps/guidelines/"
   context: "/guidelines"
-  components: 1.35.1
+  components: 1.35.2
   # components: dev
   cdn: "https://unpkg.com/@teipublisher/pb-components"
   # cdn: "http://localhost:8000"

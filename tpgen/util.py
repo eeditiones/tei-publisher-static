@@ -65,7 +65,7 @@ class Config:
     def __init__(self, config: Path, baseUri: str, baseDir: Path, verbose: bool = False) -> None:
         self.baseUri = baseUri
         self.baseDir = baseDir
-        self.context = '/'
+        self.context = ''
         self.collection = True
         self.verbose = verbose
         with open(config, 'r') as f:
