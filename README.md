@@ -6,7 +6,7 @@ This repository contains a static site generator for TEI Publisher. It can basic
 
 Obviously the generated website will lack some of the functionality, which requires a database backend, in particular:
 
-* no search facility
+* simple client-side search only
 * no facetted browsing
 
 On the upside, the resulting HTML files can be hosted on any webserver at small or no cost (e.g. using github pages). Most web components and page layouts will still work as before. A static site is thus a viable option for small editions with a strong focus on the text presentation and requiring less advanced features.
@@ -36,7 +36,7 @@ python3 -m tpgen build -c guidelines.yml
 The `build` command includes the following tasks (if defined in the configuration):
 
 1. fetch all *assets* (if any) and store them into the configured output directory
-2. recursively scan the *root data collection* of the application. This will store the information to be displayed in the document browser, which - by default - is the main entry point into a TEI Publisher application. 
+2. if enabled: recursively scan the *root data collection* of the application. This will store the information to be displayed in the document browser, which - by default - is the main entry point into a TEI Publisher application. 
 3. traverse and download all documents found during the collection scan by following links from the collection listing
 4. fetch additional pages as defined in the *pages* section. Those are pages which do not directly correspond to a single TEI document listed in the document browser and therefore won't be processed by step 3.
 
