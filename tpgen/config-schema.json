@@ -53,10 +53,6 @@
                                         },
                                         "odd": {
                                             "type": "string"
-                                        },
-                                        "user.track-ids": {
-                                            "type": "string",
-                                            "enum": ["yes", "no"]
                                         }
                                     }
                                 }
