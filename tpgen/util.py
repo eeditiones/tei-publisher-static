@@ -2,10 +2,12 @@ from pathlib import Path
 from shutil import rmtree
 from os import makedirs
 from typing import List
-from typer import echo, secho, style, colors
+from typer import echo, secho, style, colors, Exit
 from urllib.parse import urljoin
 from jinja2 import Environment, FileSystemLoader, Template, select_autoescape
 import yaml
+from jsonschema import validate as json_validate, ValidationError
+import json
 import requests
 import glob
 
@@ -70,6 +72,8 @@ class Config:
         self.verbose = verbose
         with open(config, 'r') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
+            if not self._validate(data):
+                Exit(1)
             if data.get('collection') == False:
                 self.collection = False
             self.variables = data.get('variables')
@@ -101,6 +105,20 @@ class Config:
                         f.write(resp.content)
         self._copyScripts()
     
+    def _validate(self, data):
+        with open(Path(__package__, 'config-schema.json'), 'r') as f:
+            schema = json.load(f)
+
+        try:
+            json_validate(data, schema)
+        except ValidationError as e:
+            echo(f"""
+Configuration error: {style(e.message, colors.RED)}
+Offending configuration property: {" -> ".join(e.absolute_path)}
+            """)
+            return False
+        return True
+
     def _copyScripts(self):
         outDir = Path(self.baseDir, 'scripts')
         makedirs(outDir, exist_ok=True)

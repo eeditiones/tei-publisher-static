@@ -58,7 +58,7 @@ def _collection(config: Config, path: str, recurse: bool):
 def collection(
     path: Optional[str] = typer.Argument(None),
     baseUri: Optional[str] = typer.Option('http://localhost:8080/exist/apps/tei-publisher/', help='TEI Publisher base URI'),
-    outDir: Optional[Path] = typer.Option('static', help='Output directory'),
+    outDir: Optional[Path] = typer.Option('static', '--out', '-o', help='Output directory'),
     recurse: bool = typer.Option(False, '--recursive', '-r', help='Fetch subcollections and documents recursively'),
     configFile: Optional[Path] = typer.Option('config.yml', '--config', '-c', help="Configuration file to use"),
     verbose: Optional[bool] = typer.Option(False, '--verbose', '-v', help='Be more verbose')
@@ -69,7 +69,7 @@ def collection(
 
 @app.command()
 def clean(
-    outDir: Optional[Path] = typer.Option('static', help='Output directory'),
+    outDir: Optional[Path] = typer.Option('static', '--out', '-o', help='Output directory'),
 ):
     """Clean generated content"""
     typer.echo(f"Deleting output directory {typer.style(str(outDir), typer.colors.BLUE)}")
@@ -89,7 +89,7 @@ def build(
 
 @app.command()
 def serve(
-    outDir: Optional[Path] = typer.Option('static', help='Output directory'),
+    outDir: Optional[Path] = typer.Option('static', '--out', '-o', help='Output directory'),
     port: Optional[int] = typer.Option(8001, '--port', '-p', help='Port to listen on')
 ):
     """Start simple python webserver"""
@@ -99,6 +99,14 @@ def serve(
     with socketserver.TCPServer(("", port), Handler) as httpd:
         typer.echo(f"Listening on {httpd.server_address[0]}:{httpd.server_address[1]}")
         httpd.serve_forever()
+
+@app.command()
+def validate(
+    configFile: Optional[Path] = typer.Option('config.yml', '--config', '-c', help="Configuration file to use"),
+    baseUri: Optional[str] = typer.Option('http://localhost:8080/exist/apps/tei-publisher/', help='TEI Publisher base URI'),
+    outDir: Optional[Path] = typer.Option('static', '--out', '-o', help='Output directory')
+):
+    config = _loadConfig(configFile, baseUri, outDir, False)
 
 def _version(version: bool):
     if version:

@@ -1,0 +1,100 @@
+{
+    "$id": "https://teipublisher.com/static/schema/config",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "description": "TEI Publisher Static Site Generator: Configuration Schema",
+    "type": "object",
+    "properties": {
+        "variables": {
+            "type": "object",
+            "properties": {
+                "remote": {
+                    "description": "Base URI of the TEI Publisher instance to fetch data from",
+                    "type": "string",
+                    "format": "uri"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "context": {
+                    "type": "string"
+                }
+            }
+        },
+        "collection": {
+            "type": "boolean"
+        },
+        "templates": {
+            "description": "Describes available HTML templates and their data views",
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+                "properties": {
+                    "variables": {
+                        "type": "object"
+                    },
+                    "data": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "oneOf": [
+                                { "type": "null" },
+                                { "type": "string" },
+                                { 
+                                    "type": "object",
+                                    "properties": {
+                                        "index": {
+                                            "type": "string"
+                                        },
+                                        "view": {
+                                            "type": "string",
+                                            "enum": ["div", "page", "single"]
+                                        },
+                                        "xpath": {
+                                            "type": "string"
+                                        },
+                                        "odd": {
+                                            "type": "string"
+                                        },
+                                        "user.track-ids": {
+                                            "type": "string",
+                                            "enum": ["yes", "no"]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "pages": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+                "properties": {
+                    "template": {
+                        "type": "string"
+                    },
+                    "doc": {
+                        "type": "string"
+                    },
+                    "sequence": {
+                        "type": "string"
+                    },
+                    "output": {
+                        "type": "string"
+                    }
+                },
+                "required": ["template"],
+                "dependentRequired": {
+                    "output": ["sequence"]
+                }
+            }
+        },
+        "assets": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            }
+        }
+    }
+}

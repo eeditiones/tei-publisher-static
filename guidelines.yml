@@ -1,5 +1,6 @@
 # Generates a static version of the TEI Guidelines
 # application available on https://github.com/eeditiones/tei-guidelines
+"$schema": "https://teipublisher.com/static/schema/config"
 variables:
   title: "TEI P5: Guidelines for Electronic Text Encoding and Interchange"
   remote: "http://localhost:8080/exist/apps/guidelines/"
@@ -52,7 +53,6 @@ templates:
         user.lng: en
       toc.html: "api/document/{{doc}}/contents?target=transcription&icons=true"
   guidelines_start.html:
-    variables:
     data:
       title:
         view: single
