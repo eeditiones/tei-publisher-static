@@ -1,5 +1,16 @@
 {% extends 'guidelines_base.html' %}
 
+{% block scripts %}
+<script>
+    window.addEventListener('WebComponentsReady', function() {
+
+    pbEvents.subscribe('pb-navigate', 'transcription', () => {
+        window.scrollTo(0, 0);
+    });
+});
+</script>
+{% endblock scripts %}
+
 {% block styles %}
 <style>
     @media (min-width: 769px) {
@@ -25,6 +36,10 @@
 
     @media (min-width: 769px) {
         .content-body header {
+            width: 100%;
+        }
+
+        .content-body header pb-view {
             width: 100%;
         }
     }
