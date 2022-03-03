@@ -270,7 +270,7 @@ def _expandLinks(config: Config, content: str) -> BeautifulSoup:
         if urlparse(url).path:
             absolute = urljoin(config.baseUri, url)
             if absolute.startswith(config.baseUri):
-                absolute = urljoin(config.context, url)
+                absolute = urljoin('/' if config.context == '' else config.context, url)
                 link['href'] = absolute
     return soup
 
