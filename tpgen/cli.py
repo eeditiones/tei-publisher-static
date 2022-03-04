@@ -101,12 +101,12 @@ def serve(
         httpd.serve_forever()
 
 @app.command()
-def validate(
+def assets(
     configFile: Optional[Path] = typer.Option('config.yml', '--config', '-c', help="Configuration file to use"),
     baseUri: Optional[str] = typer.Option('http://localhost:8080/exist/apps/tei-publisher/', help='TEI Publisher base URI'),
     outDir: Optional[Path] = typer.Option('static', '--out', '-o', help='Output directory')
 ):
-    config = _loadConfig(configFile, baseUri, outDir, False)
+    _loadConfig(configFile, baseUri, outDir, False)
 
 def _version(version: bool):
     if version:

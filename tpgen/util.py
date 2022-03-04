@@ -3,18 +3,24 @@ from shutil import rmtree
 from os import makedirs
 from typing import List
 from typer import echo, secho, style, colors, Exit
-from urllib.parse import urljoin
-from jinja2 import Environment, FileSystemLoader, Template, select_autoescape
+from urllib.parse import urljoin, urlparse
+from jinja2 import Environment, FileSystemLoader, Template, select_autoescape, pass_context
 import yaml
 from jsonschema import validate as json_validate, ValidationError
 import json
 import requests
 import glob
+from datetime import datetime
+
+@pass_context
+def expand_str(ctx, value) -> str:
+    return expandTemplateString(value, ctx.get_all())
 
 jinija = Environment(
     loader=FileSystemLoader(searchpath="templates"), 
     autoescape=select_autoescape(enabled_extensions=('html', 'xml'), default_for_string=True)
 )
+jinija.filters['expand_str'] = expand_str
 
 def expandTemplateString(template: str, params: dict) -> str:
     """Expand the given template string via jinija
@@ -27,7 +33,7 @@ def expandTemplateString(template: str, params: dict) -> str:
         str: expanded string
     """
     template = jinija.from_string(template)
-    return template.render(params)
+    return template.render(_templateInfo(template, params))
 
 def selectTemplate(templates: List) -> Template:
     """Find the first available template by going through the supplied list
@@ -55,10 +61,16 @@ def expandTemplate(template: Template, meta: dict, output: Path):
     params = dict(meta)
     if meta.get('odd'):
         params['odd'] = meta['odd'][:-4]
-    content = template.render(params)
+    content = template.render(_templateInfo(template, params))
     with open(Path(output, 'index.html'), "w", encoding="UTF-8") as f:
         f.write(content)
     return template.name
+
+def _templateInfo(template: Template, params: dict) -> dict:
+    params['page'] = {
+        'time': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    return params
 
 class Config:
     """Central configuration class initialized from YAML config file
@@ -88,8 +100,9 @@ class Config:
                 stripped = self.variables.get('context').strip('/')
                 self.context = f"/{stripped}/"
                 self.baseDir = Path(self.baseDir, stripped)
+
             if self.variables.get('title'):
-                echo(f"Fetching: {style(self.variables['title'], colors.GREEN)}")
+                echo(f"Using config: {style(self.variables['title'], colors.GREEN)}")
 
     def loadAssets(self):
         if self.assets:
@@ -98,12 +111,21 @@ class Config:
                 makedirs(outputPath.parent, exist_ok=True)
                 
                 url = expandTemplateString(self.assets[asset], self.variables)
-                url = urljoin(self.baseUri, url)
-                resp = requests.get(url)
-                if resp.status_code == 200:
-                    with open(outputPath, "wb") as f:
-                        f.write(resp.content)
-        self._copyScripts()
+                urlparts = urlparse(url)
+                if urlparts.netloc != '':
+                    url = urljoin(self.baseUri, url)
+                    resp = requests.get(url)
+                    if resp.status_code == 200:
+                        with open(outputPath, "wb") as f:
+                            f.write(resp.content)
+                else:
+                    for source in glob.glob(self.assets[asset]):
+                        sourcePath = Path(source)
+                        with open(sourcePath, 'r', encoding='UTF-8') as f:
+                            expanded = expandTemplateString(f.read(), self.variables)
+                        outputFile = Path(outputPath, sourcePath.name)
+                        with open(outputFile, 'w', encoding='UTF-8') as f:
+                            f.write(expanded)
     
     def _validate(self, data):
         with open(Path(__package__, 'config-schema.json'), 'r') as f:
@@ -118,16 +140,6 @@ Offending configuration property: {" -> ".join(e.absolute_path)}
             """)
             return False
         return True
-
-    def _copyScripts(self):
-        outDir = Path(self.baseDir, 'scripts')
-        makedirs(outDir, exist_ok=True)
-        for file in glob.glob('templates/scripts/*.js'):
-            path = Path(file).relative_to('templates')
-            template = jinija.get_template(str(path))
-            output = template.render(self.variables)
-            with open(Path(outDir, path.name), 'w', encoding="UTF-8") as f:
-                f.write(output)
 
 def createDirectory(baseDir: Path, path: str, clear: bool = False):
     outDir = Path(baseDir, path) if path else baseDir

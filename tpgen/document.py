@@ -150,7 +150,7 @@ def _index(config: Config, selector: str, content: BeautifulSoup, info: dict, pa
                 divWithId = block.find_parent(('div', 'section'), attrs={ 'id': True })
                 id = '' if divWithId == None else divWithId['id']
                 doc = {
-                    'path': f"{config.context}{str(relPath)}{params}#{id}",
+                    'path': f"{'/' if config.context == '' else config.context}{str(relPath)}{params}#{id}",
                     'context': context['data-tei'] if context else None,
                     'content': block.get_text(),
                     'title': block.name in ('h1', 'h2', 'h3', 'h4', 'h5', 'h6')
