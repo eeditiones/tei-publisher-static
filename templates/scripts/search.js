@@ -110,7 +110,7 @@ window.addEventListener('WebComponentsReady', function() {
         document.getElementById('search-input').value = query;
     }
     
-    const index = new FlexSearch.Index({
+    const index = new FlexSearch.Worker({
         tokenize: "reverse"
     });
 
