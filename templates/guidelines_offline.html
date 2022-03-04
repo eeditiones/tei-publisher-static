@@ -1,0 +1,22 @@
+{% extends 'guidelines_base.html' %}
+{% block styles %}
+<style>
+    main {
+        margin: 0 auto;
+    }
+</style>
+{% endblock styles %}
+
+{% block content %}
+<main>
+    <h1>Offline</h1>
+
+    <p>You appear to be offline. The page will reload once you are online again.</p>
+    <p>Pages visited before will still be available.</p>
+</main>
+<script>
+    window.addEventListener('online', function() {
+        window.location.reload();
+    });
+</script>
+{% endblock content %}

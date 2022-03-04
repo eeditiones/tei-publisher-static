@@ -62,7 +62,15 @@ function breadcrumbs(context, elem) {
 function search(index, query) {
     const results = document.getElementById('results');
     results.innerHTML = '';
-    index.search(query).then((result) => {
+    index.search(query, 100).then((result) => {
+        const info = document.createElement('h4');
+        if (result.length === 100) {
+            info.innerHTML = `Showing first 100 matches.`;
+        } else {
+            info.innerHTML = `Found ${result.length} matches.`;
+        }
+        results.appendChild(info);
+
         const tokens = [query, ...query.split(/\W+/)];
         const regex = new RegExp(tokens.join('|'), 'gi');
         result.forEach((idx) => {
@@ -102,7 +110,7 @@ window.addEventListener('WebComponentsReady', function() {
         document.getElementById('search-input').value = query;
     }
     
-    const index = new FlexSearch.Worker({
+    const index = new FlexSearch.Index({
         tokenize: "reverse"
     });
 

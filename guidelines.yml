@@ -101,6 +101,8 @@ pages:
     doc: p5.xml
   "search":
     template: guidelines_search.html
+  "offline":
+    template: guidelines_offline.html
   "ref":
     template: guidelines_ref.html
     sequence: "api/idents"

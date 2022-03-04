@@ -39,7 +39,6 @@
                     <div class="drawer-content">
                         <pb-media-query query="(max-width: 1023px)">
                             {% block drawer %}{% endblock drawer %}
-                            <pb-search id="query" label="Search" action="{{context}}/search" disable-autocomplete redirect></pb-search>
                             <paper-listbox>
                                 <paper-item>
                                     <a href="https://tei-c.org/guidelines/p5/using-the-tei-github-repository/">Getting and Using the TEI Sources</a>
@@ -87,17 +86,17 @@
                             <pb-zoom emit="transcription" direction="in" icon="icons:zoom-in"></pb-zoom>
                             <pb-zoom emit="transcription" direction="out" icon="icons:zoom-out"></pb-zoom>
                             <pb-navigation emit="transcription" keyboard="left"
-                                subscribe="transcription" direction="backward" unit="page">
+                                subscribe="guide" direction="backward" unit="page">
                                 <paper-icon-button icon="icons:chevron-left"></paper-icon-button>
                             </pb-navigation>
                             <pb-navigation emit="transcription" keyboard="right"
-                                subscribe="transcription" direction="forward" unit="page">
+                                subscribe="guide" direction="forward" unit="page">
                                 <paper-icon-button icon="icons:chevron-right"></paper-icon-button>
                             </pb-navigation>
                             <pb-media-query query="max-width: 1023px">
                                 <paper-icon-button icon="icons:menu" drawer-toggle="drawer-toggle"/>
                             </pb-media-query>
-                            <pb-progress subscribe="transcription" indeterminate="indeterminate" bottom-item="bottom-item"></pb-progress>
+                            <pb-progress subscribe="guide" indeterminate="indeterminate" bottom-item="bottom-item"></pb-progress>
                         </app-toolbar>
                     </app-header>
                     {% block content %}{% endblock %}
