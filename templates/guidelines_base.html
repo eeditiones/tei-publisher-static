@@ -105,5 +105,10 @@
             </app-drawer-layout>
         </pb-page>
         <div class="splash"></div>
+        <script>
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('{{context}}/sw.js');
+            }
+        </script>
     </body>
 </html>

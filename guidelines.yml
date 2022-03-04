@@ -3,6 +3,7 @@
 "$schema": "https://teipublisher.com/static/schema/config"
 variables:
   title: "TEI P5: Guidelines for Electronic Text Encoding and Interchange"
+  name: "guidelines"
   remote: "http://localhost:8080/exist/apps/guidelines/"
   context: "/guidelines"
   components: 1.35.2
@@ -32,6 +33,13 @@ variables:
     "sv": "Svenska"
     "tr": "Türkçe"
     "uk": "Українська"
+  precache:
+    - "{{context}}/css/theme.css"
+    - "{{context}}/css/guidelines.css"
+    - "{{context}}/css/tei.css"
+    - "{{context}}/index.jsonl"
+    - "{{context}}/p5.xml/toc.html"
+    - "{{context}}/autocomplete.html"
 collection: false # do not process collections
 templates:
   guidelines.html:
@@ -110,3 +118,5 @@ assets:
   "images/favicon-32.png": "{{remote}}resources/images/favicon-32.png"
   "images/favicon-64.png": "{{remote}}resources/images/favicon-64.png"
   "images/favicon.ico": "{{remote}}resources/images/favicon.ico"
+  "": "templates/scripts/sw.js"
+  "scripts/": "templates/scripts/search.js"
