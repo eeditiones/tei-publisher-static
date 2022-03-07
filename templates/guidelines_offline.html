@@ -2,17 +2,21 @@
 {% block styles %}
 <style>
     main {
-        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 </style>
 {% endblock styles %}
 
 {% block content %}
 <main>
-    <h1>Offline</h1>
+    <section>
+        <h1>Offline</h1>
 
-    <p>You appear to be offline. The page will reload once you are online again.</p>
-    <p>Pages visited before will still be available.</p>
+        <p>You appear to be offline. The page will reload once you are online again.</p>
+        <p>Pages visited before will still be available.</p>
+    </section>
 </main>
 <script>
     window.addEventListener('online', function() {

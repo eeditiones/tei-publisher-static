@@ -8,8 +8,7 @@ import requests
 def fetch(config: Config):
     if not config.pages:
         return
-    for page in config.pages:
-        pageConf = config.pages[page]
+    for page, pageConf in config.pages.items():
         typer.echo(f"Processing page /{typer.style(page, typer.colors.MAGENTA)}...")
         if 'doc' in pageConf:
             tpgen.document.fetch_document(config, pageConf['doc'], 

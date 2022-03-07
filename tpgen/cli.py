@@ -29,6 +29,7 @@ def pages(
     """Only process the `pages` section defined in the configuration"""
     config = _loadConfig(configFile, baseUri, outDir, verbose)
     tpgen.pages.fetch(config)
+    config.serviceWorker()
 
 def _document(config: Config, doc: str):
     tpgen.document.fetch_document(config, doc)
@@ -66,6 +67,7 @@ def collection(
     """Recursively fetch collections, also including linked documents if --recursive is specified."""
     config = _loadConfig(configFile, baseUri, outDir, verbose)
     _collection(config, path, recurse)
+    config.serviceWorker()
 
 @app.command()
 def clean(
@@ -86,6 +88,7 @@ def build(
     config = _loadConfig(configFile, baseUri, outDir, verbose)
     config.collection and _collection(config, None, True)
     tpgen.pages.fetch(config)
+    config.serviceWorker()
 
 @app.command()
 def serve(
@@ -106,7 +109,8 @@ def assets(
     baseUri: Optional[str] = typer.Option('http://localhost:8080/exist/apps/tei-publisher/', help='TEI Publisher base URI'),
     outDir: Optional[Path] = typer.Option('static', '--out', '-o', help='Output directory')
 ):
-    _loadConfig(configFile, baseUri, outDir, False)
+    config = _loadConfig(configFile, baseUri, outDir, False)
+    config.serviceWorker()
 
 def _version(version: bool):
     if version:

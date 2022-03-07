@@ -33,13 +33,6 @@ variables:
     "sv": "Svenska"
     "tr": "Türkçe"
     "uk": "Українська"
-  precache:
-    - "{{context}}/css/theme.css"
-    - "{{context}}/css/guidelines.css"
-    - "{{context}}/css/tei.css"
-    - "{{context}}/index.jsonl"
-    - "{{context}}/p5.xml/toc.html"
-    - "{{context}}/autocomplete.html"
 collection: false # do not process collections
 templates:
   guidelines.html:
@@ -99,26 +92,48 @@ pages:
   "p5.xml":
     template: guidelines.html
     doc: p5.xml
-  "search":
-    template: guidelines_search.html
-  "offline":
-    template: guidelines_offline.html
   "ref":
     template: guidelines_ref.html
     sequence: "api/idents"
     output: "ref/{{ident}}"
 assets:
-  "css/theme.css": "{{remote}}resources/css/theme.css"
-  "ref/tei.css": "{{remote}}transform/tei.css"
-  "images/tei.png": "{{remote}}resources/images/tei.png"
-  "images/GitHub-Mark-Light-64px.png": "{{remote}}resources/images/GitHub-Mark-Light-64px.png"
-  "css/guidelines.css": "{{remote}}resources/css/guidelines.css"
-  "scripts/app.js": "{{remote}}resources/scripts/app.js"
-  "images/tei-publisher-logo-contrast-color.svg": "{{remote}}resources/images/tei-publisher-logo-contrast-color.svg"
-  "images/favicon-16.png": "{{remote}}resources/images/favicon-16.png"
-  "images/favicon-24.png": "{{remote}}resources/images/favicon-24.png"
-  "images/favicon-32.png": "{{remote}}resources/images/favicon-32.png"
-  "images/favicon-64.png": "{{remote}}resources/images/favicon-64.png"
-  "images/favicon.ico": "{{remote}}resources/images/favicon.ico"
-  "": "templates/scripts/sw.js"
-  "scripts/": "templates/scripts/search.js"
+  "css":
+    - "{{remote}}resources/css/theme.css"
+    - "{{remote}}resources/css/guidelines.css"
+  "images":
+    - "{{remote}}resources/images/tei.png"
+    - "{{remote}}resources/images/GitHub-Mark-Light-64px.png"
+    - "{{remote}}resources/images/tei-publisher-logo-contrast-color.svg"
+    - "{{remote}}resources/images/favicon-16.png"
+    - "{{remote}}resources/images/favicon-24.png"
+    - "{{remote}}resources/images/favicon-32.png"
+    - "{{remote}}resources/images/favicon-64.png"
+    - "{{remote}}resources/images/favicon.ico"
+    - "{{remote}}resources/images/android-chrome-192x192.png"
+    - "{{remote}}resources/images/android-chrome-384x384.png"
+  "ref": 
+    - "{{remote}}transform/tei.css"
+  "scripts":
+    - "{{remote}}resources/scripts/app.js"
+    - "templates/scripts/search.js"
+  "":
+    - "templates/scripts/sw.js"
+    - "templates/*.json"
+    - in: "templates/guidelines_offline.html"
+      out: "offline.html"
+    - in: "templates/guidelines_search.html"
+      out: "search.html"
+# settings for the service worker:
+worker:
+  # list of assets which should be added to the cache when the first page loads
+  precache:
+    - "**/*.html"
+    - "**/*.css"
+    - "index.jsonl"
+    - "offline.*"
+    - "https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@300&display=swap"
+    - "{{cdn}}/src/pb-components-bundle.js"
+    - "{{cdn}}@{{components}}/dist/pb-components-bundle.js"
+    - "https://unpkg.com/@webcomponents/webcomponentsjs@2.4.3/webcomponents-loader.js"
+    - "https://unpkg.com/web-animations-js@2.3.2/web-animations-next-lite.min.js"
+    - "https://cdn.jsdelivr.net/gh/nextapps-de/flexsearch@0.7.2/dist/flexsearch.bundle.js"

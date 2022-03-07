@@ -1,12 +1,14 @@
 from pathlib import Path
-from shutil import rmtree
+from shutil import copyfile, rmtree
 from os import makedirs
 from typing import List
+from numpy import isin
 from typer import echo, secho, style, colors, Exit
 from urllib.parse import urljoin, urlparse
 from jinja2 import Environment, FileSystemLoader, Template, select_autoescape, pass_context
 import yaml
 from jsonschema import validate as json_validate, ValidationError
+from mimetypes import guess_type
 import json
 import requests
 import glob
@@ -21,6 +23,11 @@ jinija = Environment(
     autoescape=select_autoescape(enabled_extensions=('html', 'xml'), default_for_string=True)
 )
 jinija.filters['expand_str'] = expand_str
+
+textMimeTypes = (
+    'application/json', 'application/javascript', 'text/html', 'application/xml', 'text/css', 'text/text',
+    'application/markdown'
+)
 
 def expandTemplateString(template: str, params: dict) -> str:
     """Expand the given template string via jinija
@@ -95,6 +102,7 @@ class Config:
             self.templates = data.get('templates')
             self.pages = data.get('pages')
             self.assets = data.get('assets')
+            self.worker = data.get('worker')
 
             if self.variables.get('context'):
                 stripped = self.variables.get('context').strip('/')
@@ -105,29 +113,50 @@ class Config:
                 echo(f"Using config: {style(self.variables['title'], colors.GREEN)}")
 
     def loadAssets(self):
-        if self.assets:
-            for asset in self.assets:
-                outputPath = Path(self.baseDir, asset)
-                makedirs(outputPath.parent, exist_ok=True)
-                
-                url = expandTemplateString(self.assets[asset], self.variables)
+        """Process the `assets` section of the config; fetch or copy the listed resources.
+        """
+        if not self.assets:
+            return
+        for asset in self.assets:
+            sources = self.assets[asset]
+            outputPath = Path(self.baseDir, asset)
+            makedirs(outputPath, exist_ok=True)
+            
+            for source in sources:
+                outputFile = None
+                if isinstance(source, str):
+                    inputFile = source
+                else:
+                    inputFile = source['in']
+                    outputFile = source['out']
+                url = expandTemplateString(inputFile, self.variables)
                 urlparts = urlparse(url)
                 if urlparts.netloc != '':
                     url = urljoin(self.baseUri, url)
                     resp = requests.get(url)
                     if resp.status_code == 200:
-                        with open(outputPath, "wb") as f:
+                        fileName = outputFile or Path(urlparts.path).name
+                        with open(Path(outputPath, fileName), "wb") as f:
                             f.write(resp.content)
                 else:
-                    for source in glob.glob(self.assets[asset]):
+                    files = [inputFile] if outputFile else glob.glob(source)
+                    for source in files:
                         sourcePath = Path(source)
-                        with open(sourcePath, 'r', encoding='UTF-8') as f:
-                            expanded = expandTemplateString(f.read(), self.variables)
-                        outputFile = Path(outputPath, sourcePath.name)
-                        with open(outputFile, 'w', encoding='UTF-8') as f:
-                            f.write(expanded)
+                        if guess_type(source)[0] in textMimeTypes:
+                            with open(sourcePath, 'r', encoding='UTF-8') as f:
+                                expanded = expandTemplateString(f.read(), self.variables)
+                            with open(Path(outputPath, outputFile or sourcePath.name), 'w', encoding='UTF-8') as f:
+                                f.write(expanded)
+                        else:
+                            copyfile(sourcePath, outputFile)
     
-    def _validate(self, data):
+    def _validate(self, data: dict) -> bool:
+        """
+            Validate the configuration against the schema in `config-schema.json`.
+
+            Args:
+                data: the configuration data as dict
+        """
         with open(Path(__package__, 'config-schema.json'), 'r') as f:
             schema = json.load(f)
 
@@ -140,6 +169,26 @@ Offending configuration property: {" -> ".join(e.absolute_path)}
             """)
             return False
         return True
+    
+    def serviceWorker(self):
+        if not self.worker:
+            return
+        precache = []
+        if self.worker.get('precache'):
+            for pattern in self.worker['precache']:
+                url = expandTemplateString(pattern, self.variables)
+                urlparts = urlparse(url)
+                if urlparts.netloc != '':
+                    precache.append(url)
+                else:
+                    for file in glob.glob(str(self.baseDir) + '/' + url, recursive=True):
+                        path = Path(self.context if self.context != '' else '/', Path(file).relative_to(self.baseDir))
+                        precache.append(path)
+        params = { **self.variables, 'precache': precache }
+        template = selectTemplate(['scripts/sw.js'])
+        output = template.render(params)
+        with open(Path(self.baseDir, 'sw.js'), 'w', encoding='UTF-8') as f:
+            f.write(output)
 
 def createDirectory(baseDir: Path, path: str, clear: bool = False):
     outDir = Path(baseDir, path) if path else baseDir

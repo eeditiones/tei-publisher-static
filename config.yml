@@ -1,5 +1,6 @@
 variables:
   title: "TEI Publisher"
+  name: "tei-publisher"
   remote: "http://localhost:8080/exist/apps/tei-publisher/"
   # the prefix under which pages will be available
   context: "/tei-publisher"
@@ -105,11 +106,13 @@ templates:
         xpath: //teiHeader
         user.mode: title
 assets:
-  "css/theme.css": "{{remote}}resources/css/theme.css"
-  "images/tei-publisher-logo-color.svg": "{{remote}}resources/images/tei-publisher-logo-color.svg"
-  "images/tei-publisher-logo-contrast-color.svg": "{{remote}}resources/images/tei-publisher-logo-contrast-color.svg"
-  "images/favicon-16.png": "{{remote}}resources/images/favicon-16.png"
-  "images/favicon-24.png": "{{remote}}resources/images/favicon-24.png"
-  "images/favicon-32.png": "{{remote}}resources/images/favicon-32.png"
-  "images/favicon-64.png": "{{remote}}resources/images/favicon-64.png"
-  "images/favicon.ico": "{{remote}}resources/images/favicon.ico"
+  "css": 
+    - "{{remote}}resources/css/theme.css"
+  "images": 
+    - "{{remote}}resources/images/tei-publisher-logo-color.svg"
+    - "{{remote}}resources/images/tei-publisher-logo-contrast-color.svg"
+    - "{{remote}}resources/images/favicon-16.png"
+    - "{{remote}}resources/images/favicon-24.png"
+    - "{{remote}}resources/images/favicon-32.png"
+    - "{{remote}}resources/images/favicon-64.png"
+    - "{{remote}}resources/images/favicon.ico"

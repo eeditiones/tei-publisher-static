@@ -7,18 +7,24 @@
         "variables": {
             "type": "object",
             "properties": {
+                "title": {
+                    "description": "Title of the website",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Short name to be used in identifiers (no spaces)",
+                    "type": "string"
+                },
                 "remote": {
                     "description": "Base URI of the TEI Publisher instance to fetch data from",
                     "type": "string",
                     "format": "uri"
                 },
-                "title": {
-                    "type": "string"
-                },
                 "context": {
                     "type": "string"
                 }
-            }
+            },
+            "required": ["title", "name"]
         },
         "collection": {
             "type": "boolean"
@@ -89,7 +95,24 @@
         "assets": {
             "type": "object",
             "additionalProperties": {
-                "type": "string"
+                "type": "array",
+                "items": {
+                    "oneOf": [
+                        { "type": "string" },
+                        { 
+                            "type": "object",
+                            "properties": {
+                                "in": {
+                                    "type": "string"
+                                },
+                                "out": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": ["in", "out"]
+                        }
+                    ]
+                }
             }
         }
     }

@@ -48,7 +48,7 @@ For testing purposes you can also call steps 2 to 4 separately using the followi
 python3 -m tpgen collection -r
 ```
 
-Without the `-r|--recursive` option, only the collection listing for the document browser will be fetched, not the content of the documents linked from it.
+Without the `-r|--recursive` option, only the collection listing for the document browser will be fetched, not the content of the documents linked from it. You can optionally specify a relative path to the root collection to fetch, e.g. `playground` if you only want documents from TEI Publisher's *playground* collection.
 
 ### Fetch/update a single document specified by relative path:
 
@@ -132,7 +132,7 @@ documentation.html:
       ...
 ```
 
-### `Pages` section (optional)
+### `pages` section (optional)
 
 This section defines pages which would not be found by traversing the collection hierarchy. This may include secondary documents like about pages, project documentation etc., or other views on the data like a listing of people, places, abbreviations or a bibliography.
 
@@ -161,6 +161,17 @@ The first mapping states that the template `guidelines_start.html` should be use
 The third entry establishes a slightly more complex mapping: instead of outputting a single page, it generates a sequence of different pages based on the information returned by the API endpoint referenced in `sequence`. This endpoint is expected to return a JSON array. Each element in the array should be an object, defining parameter mappings.
 
 For each parameter mapping, the HTML template is instantiated once with the additional parameters and any views it defines are retrieved. The resulting content is stored into the subdirectory path given by the `output` variable. As you can see above, we use the parameter `{{ident}}` as name of the final directory. This is a parameter returned by the endpoint we called to get the sequence (it will correspond to a TEI element or class name).
+
+### `assets` section
+
+This section defines static assets which should be fetched or copied into an output directory. The output directory is specified as the key of each entry and the files to be fetched as a list. 
+
+* **remote resources** should be specified with a full URI. They will be retrieved and directly stored into the output directory.
+* **local resources** should either be 
+  * a file path, which may be a glob expression (with wildcards) to potentially match multiple files
+  * an object with properties `in` and `out`, where `out` denotes the file name of the output file
+  
+  Text files (Javascript, CSS, HTML, XML) will be treated as templates, i.e. expanded by the templating system before they are stored.
 
 ## Workflow
 

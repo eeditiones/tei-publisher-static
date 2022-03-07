@@ -12,6 +12,7 @@
         <link rel="shortcut icon" type="image/png" href="{{context}}/images/favicon-64.png" sizes="64x64">
 
         <title>{{title}}</title>
+        <link rel="manifest" href="{{context}}/manifest.json">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@300&display=swap" rel="stylesheet">
@@ -70,7 +71,7 @@
                                 <a href="https://github.com/TEIC/TEI/issues" target="_blank">Report an issue</a>
                             </pb-media-query>
                             {% block menubar %}{% endblock menubar %}
-                            <pb-search id="query" label="Search" action="{{context}}/search" disable-autocomplete redirect></pb-search>
+                            <pb-search id="query" label="Search" action="{{context}}/search.html" disable-autocomplete redirect></pb-search>
                             <pb-media-query query="min-width: 1024px">
                                 <!-- language selector -->
                                 <pb-lang name="lang">

@@ -64,8 +64,7 @@ def fetch(config: Config, meta: dict, target_path: str = None, clean: bool = Tru
 
     dataConfigs = templateConfig['data']
     page = len(mapping)
-    for view in dataConfigs:
-        cfg = dataConfigs.get(view)
+    for view, cfg in dataConfigs.items():
         if isinstance(cfg, str):
             path = Path(output, view)
             meta['doc'] = quote_plus(meta['doc'])
@@ -79,9 +78,9 @@ def fetch(config: Config, meta: dict, target_path: str = None, clean: bool = Tru
                 requestParams['view'] = meta.get('view')
             index = None
             if cfg != None:
-                for key in cfg:
+                for key, value in cfg.items():
                     if key != 'index':
-                        requestParams[key] = expandTemplateString(cfg[key], meta) if isinstance(cfg[key], str) else cfg[key]
+                        requestParams[key] = expandTemplateString(value, meta) if isinstance(value, str) else value
                 index = cfg.get('index')
             if config.verbose:
                 typer.echo(f"Generating view '{typer.style(view, fg=typer.colors.GREEN)}' using template {template.name} and params {requestParams}")
