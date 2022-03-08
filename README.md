@@ -82,6 +82,8 @@ For each document, the generator performs the following operations:
 4. check if there is a configuration for the named template in `config.yml`, listing the different views to fetch data for
 5. walk through all pages of the document (as a user would do), downloading their HTML content to the output folder
 
+For some use cases, traversing a collection may not be the correct approach, e.g. if you use different means of navigating the edition. In this case, collection scanning can be disabled (`collection: false` in the config) and you can instead directly define the pages to be fetched (see below).
+
 ## Templates
 
 Because the result should be a static website, the HTML templates used are necessarily different than the ones within TEI Publisher, though it should be easy enough to copy/paste and then modify the relevant bits. The static templates use the [Jinja](https://jinja.palletsprojects.com/en/3.0.x/templates/) templating framework.
@@ -95,7 +97,7 @@ The existing templates in `templates` have been directly copied from TEI Publish
 
 The different tasks can be configured via a YAML configuration file (default: `config.yml`). 
 
-## `variables` section
+### `variables` section
 
 On top this defines various variables, which will be passed on to the templating system. You can add your own variables here and use them in your templates.
 
@@ -104,11 +106,18 @@ Important variables are:
 Variable | Description
 ---------|----------
  remote | Base URL of the TEI Publisher instance to fetch data from
- context | the prefix path under which the static content will be available
+ context | the prefix path under which the static content will be available. Use the empty string ("") if the content should be made available under the root context.
+ cdn | the CDN host to use for loading the TEI Publisher web component library
+ components | version of the TEI Publisher web component library to use
 
 ### `templates` section
 
-The `templates` section defines the data to be fetched for a given HTML template. A template may include more than one view on the content (i.e. multiple `pb-view` or `pb-load` components). You can thus define a series of different views in `data`, each using a different configuration, corresponding to the HTTP parameters to be sent with the request. For example, take the `documentation.html` template configuration:
+The `templates` section defines the data to be fetched for a given HTML template. A template may include more than one view on the content (i.e. multiple `pb-view` or `pb-load` components). You can thus define a series of different views in `data`, each using a different configuration, corresponding to the HTTP parameters to be sent with the request. Whenever the template is used (e.g. to display a given TEI document), the generator walks through the list of views. We distinguish two kinds of views:
+
+* static views which stay the same for all pages of a document: they simply require a link pointing to the static data
+* dynamic views which support pagination: in this case the generator walks through the pages as a user would and stores their content each in a separate output file
+
+For example, take the `documentation.html` template configuration:
 
 ```yaml
 documentation.html:
@@ -120,7 +129,11 @@ documentation.html:
       documentation.css: "{{remote}}templates/pages/documentation.css"
 ```
 
-Here the main text view does not require additional parameters, which are thus left empty. However, the page includes a `pb-view` for breadcrumbs and this needs to set the parameter `mode` to `breadcrumbs`. There's also a `pb-load` for the table of contents, which only needs to be retrieved once for the document and is stored into `doc.html`. Finally, we download some additional CSS and store it as well.
+The main text view is dynamic, but does not require additional parameters, which are thus left empty. The generator will contact the server-side endpoint and ask for the first page of the currently processed document. It then walks through all subsequent pages until it reaches the end.
+
+The page also includes a `pb-view` used for displaying breadcrumbs, which again is dynamic, but - contrary to the main view - requires an additional parameter `user.mode=breadcrumbs`. This will thus be added when walking through the pages.
+
+`toc.html` is a static view for the table of contents (loaded by a `pb-load` in the page). It only needs to be retrieved once for the document and is stored into `doc.html`. Finally, we download some additional CSS and store it as well.
 
 You can use any of the variables declared in the `variables` section of `config.yml` as well as the variables `doc`, `odd` and `view`, which are set to the corresponding values reported by the server for the current document. Additional per-template variables can also be defined:
 
@@ -134,11 +147,13 @@ documentation.html:
 
 ### `pages` section (optional)
 
-This section defines pages which would not be found by traversing the collection hierarchy. This may include secondary documents like about pages, project documentation etc., or other views on the data like a listing of people, places, abbreviations or a bibliography.
+This section defines pages which would not be found by traversing the collection hierarchy. This may include secondary documents like "about" pages, project documentation etc., or other views on the data like a listing of people, places, abbreviations or a bibliography.
 
 The key of each entry in the pages section defines the output path where the fetched data will be stored. The value is an object. It *must* at least reference an HTML template and either a path to a single TEI document (`doc`) or an API endpoint returning a sequence of items to be processed (`sequence`).
 
-The generator will look up the specified template in the `templates` section and retrieve the views there. If a single document was specified (via `doc`), the template will be instantiated once for the given document. If a sequence is given (via `sequence`), the generator expects an URL, which it will contact to retrieve a sequence of items. The template is called for each item in the sequence.
+The generator will look up the specified template in the `templates` section and retrieve the views there. If a single document was specified (via `doc`), the template will be instantiated once for the given document. If a sequence is given (via `sequence`), the generator expects an URL, which it will contact to retrieve a sequence of items. Each item should be an object defining one or more properties to be passed to the template as variables.
+
+The template is called for each item in the sequence, resulting in a number of subdirectories in the output folder, whose name is derived from the `output` property.
 
 For example, `guidelines.yml`, which will result in a static version of the TEI Guidelines app, defines the following:
 
@@ -156,7 +171,7 @@ pages:
     output: "ref/{{ident}}"
 ```
 
-The first mapping states that the template `guidelines_start.html` should be used as the entry page to the website. A single TEI document (`p5.xml`) is used as input. The second path, `/p5.xml`, gets generated based on the same input document.
+The first mapping states that the template `guidelines_start.html` should be used as the entry page to the website. A single TEI document (`p5.xml`) is used as input. The second path, `/p5.xml`, gets generated based on the same input document, but using a different template. In each case, the generator then checks the `template` section for a template specification describing the views to retrieve. 
 
 The third entry establishes a slightly more complex mapping: instead of outputting a single page, it generates a sequence of different pages based on the information returned by the API endpoint referenced in `sequence`. This endpoint is expected to return a JSON array. Each element in the array should be an object, defining parameter mappings.
 
