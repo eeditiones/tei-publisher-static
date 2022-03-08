@@ -79,9 +79,9 @@ templates:
       view: single
     data:
       main:
-        xpath: //(elementSpec|classSpec|macroSpec|attSpec|dataSpec)[@ident='{{ident}}']
         user.lng: en
         user.mode: ref
+        user.ident: "{{ident}}"
         odd: tei.odd
         view: single
       autocomplete.html: "api/ident/autocomplete"
@@ -89,9 +89,9 @@ pages:
   "":
     template: guidelines_start.html
     doc: p5.xml
-  "p5.xml":
-    template: guidelines.html
-    doc: p5.xml
+  # "p5.xml":
+  #   template: guidelines.html
+  #   doc: p5.xml
   "ref":
     template: guidelines_ref.html
     sequence: "api/idents"

@@ -1,3 +1,4 @@
+from typing import List
 from tpgen.util import createDirectory, expandTemplateString, selectTemplate, expandTemplate, Config
 import typer
 from pathlib import Path
@@ -26,7 +27,7 @@ def fetch_document(config: Config, doc: str, params: dict = {}, target_path: str
 
     fetch(config, { **meta, **params }, target_path, clean)
 
-def fetch(config: Config, meta: dict, target_path: str = None, clean: bool = True):
+def fetch(config: Config, meta: dict, target_path: str = None, clean: bool = True, input: List = None):
     """Recursively fetch a document using parameters given in `meta`. The relative path
     to the document should be specified in `meta["doc"]`.
 
@@ -66,34 +67,65 @@ def fetch(config: Config, meta: dict, target_path: str = None, clean: bool = Tru
     page = len(mapping)
     for view, cfg in dataConfigs.items():
         if isinstance(cfg, str):
+            # fetch a single URI
             path = Path(output, view)
-            meta['doc'] = quote_plus(meta['doc'])
+            if meta.get('doc') != None:
+                meta['doc'] = quote_plus(meta['doc'])
             uri = _load(config, cfg, path, meta)
             mapping[uri] = view
         else:
-            requestParams = {}
-            if meta.get('odd'):
-                requestParams['odd'] = meta.get('odd')
-            if meta.get('view'): 
-                requestParams['view'] = meta.get('view')
-            index = None
-            if cfg != None:
-                for key, value in cfg.items():
-                    if key != 'index':
-                        requestParams[key] = expandTemplateString(value, meta) if isinstance(value, str) else value
-                index = cfg.get('index')
+            cfg = cfg or {}
+            index = cfg.get('index')
+
             if config.verbose:
                 typer.echo(f"Generating view '{typer.style(view, fg=typer.colors.GREEN)}' using template {template.name} and params {requestParams}")
-            uri = f"{config.baseUri}/api/parts/{quote_plus(meta['doc'])}/json"
-            page += 1
-            next = _retrieve(config, uri, requestParams, view, page, mapping, output, index)
-            while next:
-                page += 1
-                next = _retrieve(config, uri, requestParams, view, page, mapping, output, index, next)
-            config.verbose and typer.echo("\n")
+
+            if input == None:
+                # traverse pages of the resource and fetch them
+                _fetchPages(config, meta, output, mapping, page, view, cfg, index)
+            else:
+                _fetch_sequence(config, meta, output, mapping, page, view, cfg, index, input)
     _save(output, mapping)
 
-def _retrieve(config: Config, uri: str, reqParams: dict, view: str, page: int, mapping: dict, 
+def _fetch_sequence(config: Config, meta: dict, output, mapping: dict, page: int, view: str, 
+    cfg, index, input_seq: List):
+    with typer.progressbar(input_seq) as progress:
+        for item in progress:
+            templateVars = {**meta, **item}
+
+            params = {}
+            for key, value in item.items():
+                if not key in ('view', 'odd', 'xpath', 'map', 'id', 'root'):
+                    params[f"user.{key}"] = value
+                else:
+                    params[key] = value
+            for key, value in cfg.items():
+                if key != 'index':
+                    params[key] = expandTemplateString(value, templateVars) if isinstance(value, str) else value
+            page += 1
+            uri = f"{config.baseUri}/api/parts/{quote_plus(item['doc'])}/json"
+            _fetchPage(config, uri, params, view, page, mapping, output, index)
+
+def _fetchPages(config, meta, output, mapping, page, view, cfg, index):
+    requestParams = {}
+    if meta.get('odd'):
+        requestParams['odd'] = meta.get('odd')
+    if meta.get('view'): 
+        requestParams['view'] = meta.get('view')
+            
+    for key, value in cfg.items():
+        if key != 'index':
+            requestParams[key] = expandTemplateString(value, meta) if isinstance(value, str) else value
+
+    uri = f"{config.baseUri}/api/parts/{quote_plus(meta['doc'])}/json"
+    page += 1
+    next = _fetchPage(config, uri, requestParams, view, page, mapping, output, index)
+    while next:
+        page += 1
+        next = _fetchPage(config, uri, requestParams, view, page, mapping, output, index, next)
+    config.verbose and typer.echo("\n")
+
+def _fetchPage(config: Config, uri: str, reqParams: dict, view: str, page: int, mapping: dict, 
     output: Path, index: str = None, root: dict = None):
     params = dict(reqParams)
     root and params.update(root)
@@ -103,9 +135,7 @@ def _retrieve(config: Config, uri: str, reqParams: dict, view: str, page: int, m
         typer.secho(f"\n{resp.text}", color=typer.colors.RED)
         return
     data = resp.json()
-    fileId = f"{view}-{page}"
-    fileName = f"{fileId}.json"
-    file = Path(output, fileName)
+    fileName = f"{view}-{page}.json"
     
     if config.verbose:
         typer.echo(f"\rWriting page: {typer.style(str(page), fg=typer.colors.BLUE)}", nl=False)
@@ -114,7 +144,7 @@ def _retrieve(config: Config, uri: str, reqParams: dict, view: str, page: int, m
     
     index and _index(config, index, content, data, output)
 
-    with (open(file, 'w')) as f:
+    with (open(Path(output, fileName), 'w')) as f:
         data['content'] = str(content)
         json.dump(data, f, ensure_ascii=False, default=lambda x: x.toJSON())
 

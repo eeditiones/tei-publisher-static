@@ -26,8 +26,4 @@ def _fetchSequence(config, page, pageConf):
     resp = requests.get(f"{config.baseUri}{sequence}")
 
     data = resp.json()
-    with typer.progressbar(data, label=f"Processing page {page}") as progress:
-        for params in progress:
-            output = expandTemplateString(pageConf.get('output'), params)
-            params['template'] = pageConf['template']
-            tpgen.document.fetch(config, params, target_path=output, clean=False)
+    tpgen.document.fetch(config, { 'template': pageConf['template'] }, target_path=page, clean=False, input=data)
