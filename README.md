@@ -62,6 +62,12 @@ python3 -m tpgen document test/F-rom.xml
 python3 -m tpgen pages
 ```
 
+### Update static assets:
+
+```sh
+python3 -m tpgen assets
+```
+
 ### Launch a Simple Webserver
 
 To see the result you can launch the built-in webserver of Python:
@@ -105,10 +111,12 @@ Important variables are:
 
 Variable | Description
 ---------|----------
- remote | Base URL of the TEI Publisher instance to fetch data from
- context | the prefix path under which the static content will be available. Use the empty string ("") if the content should be made available under the root context.
- cdn | the CDN host to use for loading the TEI Publisher web component library
- components | version of the TEI Publisher web component library to use
+title (required) | general title to be shown to the user if no other title is provided
+name | short name to be displayed when the title would not fit
+remote | Base URL of the TEI Publisher instance to fetch data from
+context | the prefix path under which the static content will be available. Use the empty string ("") if the content should be made available under the root context.
+cdn | the CDN host to use for loading the TEI Publisher web component library
+components | version of the TEI Publisher web component library to use
 
 ### `templates` section
 
@@ -187,6 +195,14 @@ This section defines static assets which should be fetched or copied into an out
   * an object with properties `in` and `out`, where `out` denotes the file name of the output file
   
   Text files (Javascript, CSS, HTML, XML) will be treated as templates, i.e. expanded by the templating system before they are stored.
+
+### `worker` section
+
+If present, the generator will also create a service worker, providing further instructions to the browser about caching strategies to be used for the different resources. Most important, you want to precache certain assets, which are needed for every page, e.g. javascript or CSS files.
+
+The service worker also increases offline usability: if users get disconnected from the network, they will still be able to browse any content visited before.
+
+Within the worker section, the `precache` property should contain a list of assets to be added to the browser cache upfront. One can use glob expressions to add e.g. all files ending with `*.js` at once.
 
 ## Workflow
 
